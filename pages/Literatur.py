@@ -1,5 +1,4 @@
 import streamlit as st
-from PIL import Image
 import pandas as pd
 
 # Load data monster
@@ -20,11 +19,11 @@ monster_name = st.sidebar.selectbox(
 monster = monster_data[monster_data['Monster'] == monster_name].iloc[0]
 description = monster_description[monster_description['Monster'] == monster_name]['Monster'].values[0]
 
-# Load gambar monster dan statistik
-monster_image = Image.open(f"Monslist/{monster_name}.webp")
-basic_stats_chart = Image.open(f"Basic_Stat/{monster_name}.png")
-attack_stats_chart = Image.open(f"Att_Stat/{monster_name}.png")
-resistance_stats_chart = Image.open(f"Res_Stat/{monster_name}.png")
+# Path gambar monster dan statistik
+monster_image_path = f"Monslist/{monster_name}.webp"
+basic_stats_chart_path = f"Basic_Stat/{monster_name}.png"
+attack_stats_chart_path = f"Att_Stat/{monster_name}.png"
+resistance_stats_chart_path = f"Res_Stat/{monster_name}.png"
 
 # Header
 st.title(f"Monster: {monster_name}")
@@ -34,7 +33,7 @@ col1, col2 = st.columns(2)  # Kolom untuk grid 2 kolom
 
 with col1:
     # Gambar Monster
-    st.image(monster_image, caption=f"{monster_name}", use_column_width=True)
+    st.image(monster_image_path, caption=f"{monster_name}", use_column_width=True)
     # Deskripsi Monster
     st.subheader("Deskripsi")
     st.write(description)
@@ -42,7 +41,7 @@ with col1:
 with col2:
     # Statistik Dasar
     st.subheader("Statistik Dasar")
-    st.image(basic_stats_chart, caption="Statistik Dasar", use_column_width=True)
+    st.image(basic_stats_chart_path, caption="Statistik Dasar", use_column_width=True)
 
 # Grid untuk Attack dan Resistance
 col3, col4 = st.columns(2)
@@ -50,9 +49,9 @@ col3, col4 = st.columns(2)
 with col3:
     # Statistik Attack Element
     st.subheader("Statistik Attack Element")
-    st.image(attack_stats_chart, caption="Statistik Attack Element", use_column_width=True)
+    st.image(attack_stats_chart_path, caption="Statistik Attack Element", use_column_width=True)
 
 with col4:
     # Statistik Resistance
     st.subheader("Statistik Resistance")
-    st.image(resistance_stats_chart, caption="Statistik Resistance", use_column_width=True)
+    st.image(resistance_stats_chart_path, caption="Statistik Resistance", use_column_width=True)
