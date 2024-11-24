@@ -38,14 +38,13 @@ col1, col2 = st.columns([1.5,1])  # Kolom untuk grid 2 kolom
 
 with col1:
 # Monster
-st.image(monster_image_path, use_column_width=True)
-st.write(monster_name)
+    st.image(monster_image_path,caption =f"{monster_name}", use_column_width=True)
 
 with col2:
 # Deskripsi dan Tendency
-st.subheader("Deskripsi")
-st.write(f"**{description}**")
-st.write(f"**Tendency**: {tendency}")
+    st.subheader("Deskripsi")
+    st.write(f"**{description}**")
+    st.write(f"**Tendency**: {tendency}")
 
 st.subheader("Statistik Dasar")
 col3, col4 = st.columns([1.5,1])  # Kolom untuk grid 2 kolom
