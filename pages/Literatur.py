@@ -34,14 +34,15 @@ col1, col2 = st.columns(2)  # Kolom untuk grid 2 kolom
 with col1:
     # Gambar Monster
     st.image(monster_image_path, caption=f"{monster_name}", use_column_width=True)
-    # Deskripsi Monster
-    st.subheader("Deskripsi")
-    st.write(description)
-
-with col2:
     # Statistik Dasar
     st.subheader("Statistik Dasar")
     st.image(basic_stats_chart_path, caption="Statistik Dasar", use_column_width=True)
+
+
+with col2:
+    # Deskripsi Monster
+    st.subheader("Deskripsi")
+    st.write(description)
 
 # Grid untuk Attack dan Resistance
 col3, col4 = st.columns(2)
