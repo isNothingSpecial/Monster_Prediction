@@ -34,12 +34,12 @@ resistance_stats_chart_path = f"Res_Stat/{monster_name}.png"
 st.title(f"Monster: {monster_name}")
 
 # Membuat layout grid
-st.subheader("Statistik Dasar")
 col1, col2 = st.columns([1.5,1])  # Kolom untuk grid 2 kolom
 
 with col1:
 # Monster
-st.image(monster_image_path, caption=f"{monster_name}", use_column_width=True)
+st.image(monster_image_path, use_column_width=True)
+st.write(monster_name)
 
 with col2:
 # Deskripsi dan Tendency
