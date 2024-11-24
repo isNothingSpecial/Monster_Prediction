@@ -22,9 +22,9 @@ description = monster_description[monster_description['Monster'] == monster_name
 
 # Load gambar monster dan statistik
 monster_image = Image.open(f"Monslist/{monster_name}.webp")
-basic_stats_chart = Image.open(f"Basic_Stat/{monster_name}.png")
-attack_stats_chart = Image.open(f"Att_Stat/{monster_name}.png")
-resistance_stats_chart = Image.open(f"Res_Stat/{monster_name}.png")
+basic_stats_chart = Image.open(f"Basic_Stat/{monster_name}.PNG")
+attack_stats_chart = Image.open(f"Att_Stat/{monster_name}.PNG")
+resistance_stats_chart = Image.open(f"Res_Stat/{monster_name}.PNG")
 
 # Header
 st.title(f"Monster: {monster_name}")
