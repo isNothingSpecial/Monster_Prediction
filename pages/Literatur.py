@@ -33,44 +33,51 @@ resistance_stats_chart_path = f"Res_Stat/{monster_name}.png"
 # Header
 st.title(f"Monster: {monster_name}")
 
-# Deskripsi dan Tendency
+# Membuat layout grid
+st.subheader("Statistik Dasar")
+col1, col2 = st.columns(2)  # Kolom untuk grid 2 kolom
+
+with col1:
+# Monster
 st.image(monster_image_path, caption=f"{monster_name}", use_column_width=True)
+
+with col2:
+# Deskripsi dan Tendency
 st.subheader("Deskripsi")
 st.write(f"**{description}**")
 st.write(f"**Tendency**: {tendency}")
 
-# Membuat layout grid
 st.subheader("Statistik Dasar")
-col1, col2 = st.columns([1,1.5])  # Kolom untuk grid 2 kolom
+col3, col4 = st.columns(2)  # Kolom untuk grid 2 kolom
 
-with col1:
+with col3:
     # Statistik Dasar
     st.image(basic_stats_chart_path, use_column_width=True)
 
-with col2:
+with col4:
     for stat in stats_basic:
         st.write(f"**{stat}:** {monster[stat]}")  # Menampilkan notasi stat dasar
 
 # Grid untuk Attack
 st.subheader("Statistik Attack Element")
-col3, col4 = st.columns([1,1.5])
+col5, col6 = st.columns([1,1.5])
 
-with col3:
+with col5:
     # Statistik Attack Element
     st.image(attack_stats_chart_path, use_column_width=True)
 
-with col4:
+with col6:
     for stat in stats_attack:
         st.write(f"**{stat.replace('Att_', 'Attack ')}:** {monster[stat]}")  # Menampilkan notasi attack element
 
 # Grid untuk Resistance
 st.subheader("Statistik Resistance Element")
-col5, col6 = st.columns([1,1.5])
+col7, col8 = st.columns([1,1.5])
 
-with col3:
+with col7:
     # Statistik Attack Element
     st.image(resistance_stats_chart_path, use_column_width=True)
 
-with col4:
+with col8:
     for stat in stats_resist:
         st.write(f"**{stat.replace('Res_', 'Resistance ')}:** {monster[stat]}")  # Menampilkan notasi attack element
