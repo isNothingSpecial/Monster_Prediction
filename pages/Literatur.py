@@ -19,6 +19,7 @@ monster_name = st.sidebar.selectbox(
 # Filter data monster yang dipilih
 monster = monster_data[monster_data['Monster'] == monster_name].iloc[0]
 description = monster_description[monster_description['Monster'] == monster_name]['Monster'].values[0]
+tendency = tendency_map[monster['Tendency']] 
 
 # Path gambar monster dan statistik
 monster_image_path = f"Monslist/{monster_name}.webp"
