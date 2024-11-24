@@ -36,7 +36,7 @@ with col1:
     st.image(monster_image_path, caption=f"{monster_name}", use_column_width=True)
     # Statistik Dasar
     st.subheader("Statistik Dasar")
-    st.image(basic_stats_chart_path, caption="Statistik Dasar", use_column_width=True)
+    st.image(basic_stats_chart_path, use_column_width=True)
 
 
 with col2:
@@ -50,9 +50,9 @@ col3, col4 = st.columns(2)
 with col3:
     # Statistik Attack Element
     st.subheader("Statistik Attack Element")
-    st.image(attack_stats_chart_path, caption="Statistik Attack Element", use_column_width=True)
+    st.image(attack_stats_chart_path, use_column_width=True)
 
 with col4:
     # Statistik Resistance
     st.subheader("Statistik Resistance")
-    st.image(resistance_stats_chart_path, caption="Statistik Resistance", use_column_width=True)
+    st.image(resistance_stats_chart_path,use_column_width=True)
