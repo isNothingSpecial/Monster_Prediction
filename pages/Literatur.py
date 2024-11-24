@@ -4,6 +4,7 @@ import pandas as pd
 # Load data monster
 monster_data = pd.read_csv("MHST_monsties.csv")
 monster_description = pd.read_csv("MHST_monsties.csv")
+tendency_map = {1: "Speed", 2: "Power", 3: "Technique"}
 
 # Sidebar untuk pencarian
 st.sidebar.title("Pencarian Monster")
@@ -43,6 +44,7 @@ with col2:
     # Deskripsi Monster
     st.subheader("Deskripsi")
     st.write(description)
+    st.write(f"**Tendency**: {tendency}")
 
 # Grid untuk Attack dan Resistance
 col3, col4 = st.columns(2)
