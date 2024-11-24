@@ -34,7 +34,7 @@ resistance_stats_chart_path = f"Res_Stat/{monster_name}.png"
 st.title(f"Monster: {monster_name}")
 
 # Membuat layout grid
-col1, col2 = st.columns([1.5,1])  # Kolom untuk grid 2 kolom
+col1, col2 = st.columns(2)  # Kolom untuk grid 2 kolom
 
 with col1:
 # Monster
@@ -43,8 +43,8 @@ with col1:
 with col2:
 # Deskripsi dan Tendency
     st.subheader("Deskripsi")
-    st.write(f"**{description}**")
-    st.write(f"**Tendency**: {tendency}")
+    st.write(f"**Nama** : {description}")
+    st.write(f"**Tendency** : {tendency}")
 
 st.subheader("Statistik Dasar")
 col3, col4 = st.columns([1.5,1])  # Kolom untuk grid 2 kolom
