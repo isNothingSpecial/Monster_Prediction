@@ -35,7 +35,7 @@ st.title(f"Monster: {monster_name}")
 
 # Membuat layout grid
 st.subheader("Statistik Dasar")
-col1, col2 = st.columns(2)  # Kolom untuk grid 2 kolom
+col1, col2 = st.columns(1.5,1)  # Kolom untuk grid 2 kolom
 
 with col1:
 # Monster
@@ -48,7 +48,7 @@ st.write(f"**{description}**")
 st.write(f"**Tendency**: {tendency}")
 
 st.subheader("Statistik Dasar")
-col3, col4 = st.columns(2)  # Kolom untuk grid 2 kolom
+col3, col4 = st.columns(1.5,1)  # Kolom untuk grid 2 kolom
 
 with col3:
     # Statistik Dasar
@@ -60,7 +60,7 @@ with col4:
 
 # Grid untuk Attack
 st.subheader("Statistik Attack Element")
-col5, col6 = st.columns([1,1.5])
+col5, col6 = st.columns([1.5,1])
 
 with col5:
     # Statistik Attack Element
@@ -72,7 +72,7 @@ with col6:
 
 # Grid untuk Resistance
 st.subheader("Statistik Resistance Element")
-col7, col8 = st.columns([1,1.5])
+col7, col8 = st.columns([1.5,1])
 
 with col7:
     # Statistik Attack Element
