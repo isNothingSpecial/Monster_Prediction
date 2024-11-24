@@ -43,9 +43,9 @@ with col1:
 
 with col2:
     # Deskripsi Monster
-    st.subheader("Deskripsi")
-    st.write(description)
-    st.write(f"**Tendency**: {tendency}")
+    st.subheader("**Deskripsi**")
+    st.write(f"Name : {description}")
+    st.write(f"Tendency : {tendency}")
 
 # Grid untuk Attack dan Resistance
 col3, col4 = st.columns(2)
