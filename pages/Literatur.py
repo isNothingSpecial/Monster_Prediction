@@ -41,7 +41,7 @@ st.write(f"**Tendency**: {tendency}")
 
 # Membuat layout grid
 st.subheader("Statistik Dasar")
-col1, col2 = st.columns(1,1.5)  # Kolom untuk grid 2 kolom
+col1, col2 = st.columns([1,1.5])  # Kolom untuk grid 2 kolom
 
 with col1:
     # Statistik Dasar
@@ -53,7 +53,7 @@ with col2:
 
 # Grid untuk Attack
 st.subheader("Statistik Attack Element")
-col3, col4 = st.columns(1,1.5)
+col3, col4 = st.columns([1,1.5])
 
 with col3:
     # Statistik Attack Element
@@ -65,12 +65,12 @@ with col4:
 
 # Grid untuk Resistance
 st.subheader("Statistik Resistance Element")
-col5, col6 = st.columns(1,1.5)
+col5, col6 = st.columns([1,1.5])
 
 with col3:
     # Statistik Attack Element
     st.image(resistance_stats_chart_path, use_column_width=True)
 
 with col4:
-    for stat in stats_attack:
+    for stat in stats_resist:
         st.write(f"**{stat.replace('Res_', 'Resistance ')}:** {monster[stat]}")  # Menampilkan notasi attack element
