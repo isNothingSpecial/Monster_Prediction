@@ -41,7 +41,7 @@ def recommend_monster_v3(opponent_stats, df1):
         }
         highest_attack_value = attack_values[lowest_resistance]
         score += highest_attack_value
-        alasan.append(f"Musuh memiliki resistance terendah terhadap {lowest_resistance},attack monster = {highest_attack_value}")
+        alasan.append(f"Musuh memiliki resistance terendah terhadap {lowest_resistance},Attack Element dari {row['Monster']} = {highest_attack_value}")
         rankings.append((row['Monster'], score, "; ".join(alasan)))
     rankings.sort(key=lambda x: x[1], reverse=True)
     return rankings[:5]
