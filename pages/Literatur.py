@@ -91,3 +91,15 @@ if literatur == 'Monster Description':
     with col8:
         for stat in stats_resist:
             st.write(f"**{stat.replace('Res_', 'Resistance ')}:** {monster[stat]}")
+
+elif literatur == 'Loot':
+    st.title(f"Loot dari Monster: {monster_name}")
+    st.write("Informasi loot akan ditambahkan di sini.")
+
+elif literatur == 'Armor and Weapon Obtained':
+    st.title(f"Armor dan Weapon dari Monster: {monster_name}")
+    st.write("Informasi armor dan weapon akan ditambahkan di sini.")
+
+elif literatur == 'Egg and Habitat':
+    st.title(f"Egg dan Habitat dari Monster: {monster_name}")
+    st.write("Informasi egg dan habitat akan ditambahkan di sini.")
