@@ -45,6 +45,22 @@ def recommend_monster_v3(opponent_stats, df1):
     rankings.sort(key=lambda x: x[1], reverse=True)
     return rankings[:5]
 
+# Fungsi untuk mencocokkan monster berdasarkan statistik
+def find_closest_monster(input_stats, df1):
+    base_stats = ["HP", "Attack", "Defence", "Speed"]
+    min_distance = float('inf')
+    closest_monster = None
+    for _, row in df.iterrows():
+        monster_stats = row[base_stats].values
+        distance = euclidean(
+            [input_stats[stat] for stat in base_stats],
+            monster_stats
+        )
+        if distance < min_distance:
+            min_distance = distance
+            closest_monster = row
+    return closest_monster
+
 # UI
 st.title("Rekomendasi Monster Terbaik")
 
@@ -70,6 +86,10 @@ opponent_stats = {
 
 # Proses Analisis
 if st.button("Cari Rekomendasi Monster"):
+    closest_monster = find_closest_monster(opponent_stats, df)
+    st.subheader("Hasil Identifikasi Monster Lawan")
+    st.write(f"Monster lawan yang paling mirip: **{closest_monster['Monster']}**")
+    
     rekomendasi = recommend_monster_v3(opponent_stats, df1)
     st.subheader("Hasil Rekomendasi")
     for rank, (monster, score, alasan) in enumerate(rekomendasi, start=1):
