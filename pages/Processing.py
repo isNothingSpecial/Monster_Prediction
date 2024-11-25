@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import os
 
 df= pd.read_csv('MHST_monsties.csv')
 df1 = df.drop(columns=['No'])
@@ -47,6 +48,7 @@ def recommend_monster_v3(opponent_stats, df1):
 
 # Path direktori gambar dan gambar default
 IMAGE_FOLDER = "monslist"
+DEFAULT_IMAGE = "monslist/Aptonoth.webp"  # Gambar default
 # UI
 st.title("Rekomendasi Monster Terbaik")
 
@@ -80,4 +82,6 @@ if st.button("Cari Rekomendasi Monster"):
         st.write(f"Alasan: {alasan}")
         # Menampilkan gambar monster, cek jika tidak ada gunakan default
         image_path = f"{IMAGE_FOLDER}/{Monster}.webp"
-        st.image(image_path, caption=f"{Monster}", use_column_width=True)
+        if not os.path.exists(image_path):
+            image_path = DEFAULT_IMAGE
+            st.image(image_path, caption=f"{Monster}", use_column_width=True)
