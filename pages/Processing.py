@@ -45,7 +45,7 @@ def recommend_monster_v3(opponent_stats, df1):
     rankings.sort(key=lambda x: x[1], reverse=True)
     return rankings[:5]
 
-monster_image_path = f"Monslist/{monster_name}.webp"
+monster_image_path = f"Monslist/{Monster}.webp"
 # UI
 st.title("Rekomendasi Monster Terbaik")
 
@@ -75,6 +75,6 @@ if st.button("Cari Rekomendasi Monster"):
     st.subheader("Hasil Rekomendasi")
     for rank, (monster, score, alasan) in enumerate(rekomendasi, start=1):
         st.markdown(f"**{rank}. {monster}**")
-        st.image(monster_image_path, caption=f"{monster_name}", use_column_width=True)
+        st.image(monster_image_path, caption=f"{Monster}", use_column_width=True)
         st.write(f"Score: {score}")
         st.write(f"Alasan: {alasan}")
