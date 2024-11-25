@@ -45,7 +45,8 @@ def recommend_monster_v3(opponent_stats, df1):
     rankings.sort(key=lambda x: x[1], reverse=True)
     return rankings[:5]
 
-monster_image_path = f"Monslist/{Monster}.webp"
+# Path direktori gambar dan gambar default
+IMAGE_FOLDER = "monslist"
 # UI
 st.title("Rekomendasi Monster Terbaik")
 
@@ -78,3 +79,5 @@ if st.button("Cari Rekomendasi Monster"):
         st.image(monster_image_path, caption=f"{Monster}", use_column_width=True)
         st.write(f"Score: {score}")
         st.write(f"Alasan: {alasan}")
+        # Menampilkan gambar monster, cek jika tidak ada gunakan default
+        image_path = f"{IMAGE_FOLDER}/{monster}.webp"
