@@ -46,7 +46,7 @@ if literatur == 'Monster Description':
 
     with col1:
     # Monster
-    st.image(monster_image_path,caption =f"{monster_name}", use_column_width=True)
+        st.image(monster_image_path,caption =f"{monster_name}", use_column_width=True)
 
     with col2:
     # Deskripsi dan Tendency
@@ -91,11 +91,11 @@ col7, col8 = st.columns(2)
 
     elif literatur == 'Loot':
         # Membuat layout grid
-    col1, col2 = st.columns(2)  # Kolom untuk grid 2 kolom
+        col1, col2 = st.columns(2)  # Kolom untuk grid 2 kolom
 
     with col1:
     # Monster
-    st.image(monster_image_path,caption =f"{monster_name}", use_column_width=True)
+        st.image(monster_image_path,caption =f"{monster_name}", use_column_width=True)
 
     with col2:
     # Deskripsi dan Tendency
@@ -115,8 +115,8 @@ col7, col8 = st.columns(2)
         st.write(f"**{stat}:** {monster[stat]}")  # Menampilkan notasi stat dasar
 
 # Grid untuk Attack
-    st.subheader("Statistik Attack Element")
-    col5, col6 = st.columns(2)
+st.subheader("Statistik Attack Element")
+col5, col6 = st.columns(2)
 
     with col5:
         # Statistik Attack Element
