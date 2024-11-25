@@ -69,7 +69,7 @@ if literatur == 'Monster Description':
     st.subheader("Statistik Dasar")
     col3, col4 = st.columns(2)
     with col3:
-        st.image(basic_stats_chart_path, caption="Statistik Dasar", use_column_width=True)
+        st.image(basic_stats_chart_path, use_column_width=True)
     with col4:
         for stat in ["HP", "Attack", "Defence", "Speed"]:
             st.write(f"**{stat}:** {monster[stat]}")
@@ -78,7 +78,7 @@ if literatur == 'Monster Description':
     st.subheader("Statistik Attack Element")
     col5, col6 = st.columns(2)
     with col5:
-        st.image(attack_stats_chart_path, caption="Statistik Attack Element", use_column_width=True)
+        st.image(attack_stats_chart_path, use_column_width=True)
     with col6:
         for stat in stats_attack:
             st.write(f"**{stat.replace('Att_', 'Attack ')}:** {monster[stat]}")
@@ -87,7 +87,7 @@ if literatur == 'Monster Description':
     st.subheader("Statistik Resistance Element")
     col7, col8 = st.columns(2)
     with col7:
-        st.image(resistance_stats_chart_path, caption="Statistik Resistance", use_column_width=True)
+        st.image(resistance_stats_chart_path, use_column_width=True)
     with col8:
         for stat in stats_resist:
             st.write(f"**{stat.replace('Res_', 'Resistance ')}:** {monster[stat]}")
