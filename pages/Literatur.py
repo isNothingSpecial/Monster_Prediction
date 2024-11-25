@@ -26,8 +26,8 @@ stats_attack = ["Att_Fire", "Att_Water", "Att_Thunder", "Att_Ice", "Att_Dragon"]
 stats_resist = ["Res_Fire", "Res_Water", "Res_Thunder", "Res_Ice", "Res_Dragon"]
 
 # Elemen Terkuat dan Resistance Tertinggi
-strongest_attack_element = stats_attack[monster[stats_attack].idxmax()]
-highest_resistance_element = stats_resist[monster[stats_resist].idxmax()]
+strongest_attack_element = [monster[stats_attack].idxmax()]
+highest_resistance_element = [monster[stats_resist].idxmax()]
 strongest_attack_value = monster[strongest_attack_element]
 highest_resistance_value = monster[highest_resistance_element]
 
