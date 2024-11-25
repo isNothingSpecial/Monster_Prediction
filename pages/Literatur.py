@@ -30,16 +30,16 @@ basic_stats_chart_path = f"Basic_Stat/{monster_name}.png"
 attack_stats_chart_path = f"Att_Stat/{monster_name}.png"
 resistance_stats_chart_path = f"Res_Stat/{monster_name}.png"
 
-# Dropdown untuk literatur
-literatur_options = ['Monster Description', 'Loot', 'Armor and Weapon Obtained', 'Egg and Habitat']
-literatur = st.selectbox('Pilih Literatur yang ingin Anda ketahui', literatur_options)
-
 st.markdown(
     """
     <h1 style='text-align: center;'>LITERATUR</h1>
     """, 
     unsafe_allow_html=True
 )
+
+# Dropdown untuk literatur
+literatur_options = ['Monster Description', 'Loot', 'Armor and Weapon Obtained', 'Egg and Habitat']
+literatur = st.selectbox('Pilih Literatur yang ingin Anda ketahui', literatur_options)
 
 # Tampilkan konten berdasarkan literatur
 if literatur == 'Monster Description':
