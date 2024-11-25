@@ -24,6 +24,12 @@ stats_basic = ["HP", "Attack", "Defence", "Speed"]
 stats_attack = ["Att_Fire", "Att_Water", "Att_Thunder", "Att_Ice", "Att_Dragon"]
 stats_resist = ["Res_Fire", "Res_Water", "Res_Thunder", "Res_Ice", "Res_Dragon"]
 
+# Elemen Terkuat dan Resistance Tertinggi
+strongest_attack_element = stats_attack[monster[stats_attack].idxmax()]
+highest_resistance_element = stats_resist[monster[stats_resist].idxmax()]
+strongest_attack_value = monster[strongest_attack_element]
+highest_resistance_value = monster[highest_resistance_element]
+
 # Path gambar monster dan statistik
 monster_image_path = f"Monslist/{monster_name}.webp"
 basic_stats_chart_path = f"Basic_Stat/{monster_name}.png"
@@ -55,6 +61,8 @@ if literatur == 'Monster Description':
         st.subheader("Deskripsi")
         st.write(f"**Nama**: {description}")
         st.write(f"**Tendency**: {tendency}")
+        st.write(f"**Elemen Terkuat**: {strongest_attack_element.replace('Att_', '')} ({strongest_attack_value})")
+        st.write(f"**Resistance Tertinggi**: {highest_resistance_element.replace('Res_', '')} ({highest_resistance_value})")
 
     # Statistik Dasar
     st.subheader("Statistik Dasar")
