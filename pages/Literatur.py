@@ -30,6 +30,9 @@ basic_stats_chart_path = f"Basic_Stat/{monster_name}.png"
 attack_stats_chart_path = f"Att_Stat/{monster_name}.png"
 resistance_stats_chart_path = f"Res_Stat/{monster_name}.png"
 
+lit = ['Monster Description', 'Loot','Armor and Weapon Obtained', 'Egg and Habitat']
+literatur = st.selectbox('Pilih Literatur yang ingin anda ketahui', lit)
+
 # Header
 st.title(f"Monster: {monster_name}")
 
