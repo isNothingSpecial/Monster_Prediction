@@ -1,66 +1,78 @@
 import streamlit as st
 import pandas as pd
-import numpy as np
-import seaborn as sns
-import matplotlib.pyplot as plt
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import RobustScaler
-from streamlit_webrtc import webrtc_streamer
 
-df = pd.read_csv('data_will_model.csv')
+df= pd.read_csv('MHST_monsties.csv')
+df1 = df.drop(columns=['No'])
 
-scaler = RobustScaler()
-numerical_cols = ['song_popularity','song_duration_min', 'danceability',
-                 'energy', 'loudness','speechiness','time_signature','audio_mode','tempo_category_numeric']
-df[numerical_cols] = scaler.fit_transform(df[numerical_cols])
+# Fungsi rekomendasi (versi lengkap dari sebelumnya)
+def recommend_monster_v3(opponent_stats, df1):
+    rankings = []
+    resistance_values = {
+        'Fire': opponent_stats['Res_Fire'],
+        'Water': opponent_stats['Res_Water'],
+        'Thunder': opponent_stats['Res_Thunder'],
+        'Ice': opponent_stats['Res_Ice'],
+        'Dragon': opponent_stats['Res_Dragon']
+    }
+    lowest_resistance = min(resistance_values, key=resistance_values.get)
+    for _, row in df1.iterrows():
+        monster_stats = row.drop('Monster').to_dict()
+        score = 0
+        alasan = []
+        if opponent_stats['Tendency'] == 2 and monster_stats['Tendency'] == 1:
+            score += 10
+            alasan.append("Speed counter Power (Tendency)")
+        elif opponent_stats['Tendency'] == 3 and monster_stats['Tendency'] == 2:
+            score += 10
+            alasan.append("Power counter Technique (Tendency)")
+        elif opponent_stats['Tendency'] == 1 and monster_stats['Tendency'] == 3:
+            score += 10
+            alasan.append("Technique counter Speed (Tendency)")
+        else:
+            score -= 5
+            alasan.append("Tidak meng-counter tendency musuh")
+        attack_values = {
+            'Fire': monster_stats['Att_Fire'],
+            'Water': monster_stats['Att_Water'],
+            'Thunder': monster_stats['Att_Thunder'],
+            'Ice': monster_stats['Att_Ice'],
+            'Dragon': monster_stats['Att_Dragon']
+        }
+        highest_attack_value = attack_values[lowest_resistance]
+        score += highest_attack_value
+        alasan.append(f"Musuh memiliki resistance terendah terhadap {lowest_resistance}, attack monster = {highest_attack_value}")
+        rankings.append((row['Monster'], score, "; ".join(alasan)))
+    rankings.sort(key=lambda x: x[1], reverse=True)
+    return rankings[:5]
 
-# Pisahkan fitur dan target
-X = df.drop('song_popularity', axis=1)  # Fitur
-y = df['song_popularity']  # Target
+# UI
+st.title("Rekomendasi Monster Terbaik")
 
-# Membagi data menjadi data latih dan data uji
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+# Input data lawan
+st.sidebar.subheader("Input Statistik Monster Lawan")
+opponent_stats = {
+    "HP": st.sidebar.number_input("HP", value=5, min_value=0),
+    "Attack": st.sidebar.number_input("Attack", value=5, min_value=0),
+    "Defence": st.sidebar.number_input("Defence", value=5, min_value=0),
+    "Speed": st.sidebar.number_input("Speed", value=5, min_value=0),
+    "Att_Fire": st.sidebar.number_input("Attack Fire", value=5, min_value=0),
+    "Att_Water": st.sidebar.number_input("Attack Water", value=5, min_value=0),
+    "Att_Thunder": st.sidebar.number_input("Attack Thunder", value=5, min_value=0),
+    "Att_Ice": st.sidebar.number_input("Attack Ice", value=5, min_value=0),
+    "Att_Dragon": st.sidebar.number_input("Attack Dragon", value=5, min_value=0),
+    "Res_Fire": st.sidebar.number_input("Resistance Fire", value=5, min_value=0),
+    "Res_Water": st.sidebar.number_input("Resistance Water", value=5, min_value=0),
+    "Res_Thunder": st.sidebar.number_input("Resistance Thunder", value=5, min_value=0),
+    "Res_Ice": st.sidebar.number_input("Resistance Ice", value=5, min_value=0),
+    "Res_Dragon": st.sidebar.number_input("Resistance Dragon", value=5, min_value=0),
+    "Tendency": st.sidebar.selectbox("Tendency", [1, 2, 3], format_func=lambda x: {1: "Speed", 2: "Power", 3: "Technique"}[x])
+}
 
-# Membuat model Random Forest Regressor
-model = RandomForestRegressor(n_estimators=100, random_state=42)
-
-# Melatih model
-model.fit(X_train, y_train)
-
-
-# Streamlit app
-st.title('Song Popularity Prediction App')
-
-st.header('Input the song features to predict its popularity')
-
-# Input widgets untuk user input
-song_duration_min = st.number_input('Song Duration (minutes)', min_value=0.0, max_value=10.0, step=0.01)
-danceability = st.number_input('Danceability', min_value=0.0, max_value=1.0, step=0.01)
-energy = st.number_input('Energy', min_value=0.0, max_value=1.0, step=0.01)
-loudness = st.slider('Loudness (dB)', min_value=-60.0, max_value=0.0, step=0.1)
-audio_mode = st.selectbox('Audio Mode', [0, 1])  
-speechiness = st.number_input('Speechiness', min_value=0.0, max_value=1.0, step=0.01)
-key_selected = st.selectbox('Key', [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]) 
-time_selected = st.selectbox('Time Signature', [0, 1, 2, 3, 4, 5, 6]) 
-tempo_selected = st.selectbox('Tempo', [0, 1, 2, 3, 4, 5]) 
-
-# Menggabungkan semua input ke dalam satu list
-input_data = [song_duration_min, danceability, energy, loudness, audio_mode, speechiness, key_selected, time_selected, tempo_selected]
-             
-
-# Tombol untuk melakukan prediksi
-if st.button('Predict Popularity'):
-    # Konversi input data ke numpy array dan reshaped untuk prediksi
-    input_array = np.array(input_data).reshape(1, -1)
-    
-    # Standarisasi input
-    input_array_scaled = scaler.transform(input_array)
-    
-    # Melakukan prediksi
-    predicted_popularity = model.predict(input_array_scaled)[0]
-
-    prediksi_positif = np.abs(predicted_popularity) * 100
-    prediksi_positif_int = prediksi_positif.astype(int)
-    st.write(f'Song Popularity: {prediksi_positif_int}')
-
+# Proses Analisis
+if st.button("Cari Rekomendasi Monster"):
+    rekomendasi = recommend_monster_v3(opponent_stats, df1)
+    st.subheader("Hasil Rekomendasi")
+    for rank, (monster, score, alasan) in enumerate(rekomendasi, start=1):
+        st.markdown(f"**{rank}. {monster}**")
+        st.write(f"Score: {score}")
+        st.write(f"Alasan: {alasan}")
