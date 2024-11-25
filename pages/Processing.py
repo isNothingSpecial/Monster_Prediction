@@ -22,13 +22,13 @@ def recommend_monster_v3(opponent_stats, df1):
         alasan = []
         if opponent_stats['Tendency'] == 2 and monster_stats['Tendency'] == 1:
             score += 10
-            alasan.append("Speed counter Power (Tendency)\n")
+            alasan.append("Speed counter Power (Tendency)")
         elif opponent_stats['Tendency'] == 3 and monster_stats['Tendency'] == 2:
             score += 10
-            alasan.append("Power counter Technique (Tendency)\n")
+            alasan.append("Power counter Technique (Tendency)")
         elif opponent_stats['Tendency'] == 1 and monster_stats['Tendency'] == 3:
             score += 10
-            alasan.append("Technique counter Speed (Tendency)\n")
+            alasan.append("Technique counter Speed (Tendency)")
         else:
             score -= 5
             alasan.append("Tidak meng-counter tendency musuh")
@@ -41,7 +41,7 @@ def recommend_monster_v3(opponent_stats, df1):
         }
         highest_attack_value = attack_values[lowest_resistance]
         score += highest_attack_value
-        alasan.append(f"Musuh memiliki resistance terendah terhadap {lowest_resistance}\n ,attack monster = {highest_attack_value}")
+        alasan.append(f"Musuh memiliki resistance terendah terhadap {lowest_resistance},attack monster = {highest_attack_value}")
         rankings.append((row['Monster'], score, "; ".join(alasan)))
     rankings.sort(key=lambda x: x[1], reverse=True)
     return rankings[:5]
@@ -76,4 +76,6 @@ if st.button("Cari Rekomendasi Monster"):
     for rank, (monster, score, alasan) in enumerate(rekomendasi, start=1):
         st.markdown(f"**{rank}. {monster}**")
         st.write(f"Score: {score}")
-        st.write(f"Alasan: {alasan}")
+        alasan_lines = alasan.split("; ")
+        formatted_alasan = "\n".join(alasan_lines)  # Memisahkan setiap alasan dengan newline
+        st.markdown(f"**Alasan:**\n{formatted_alasan}")
