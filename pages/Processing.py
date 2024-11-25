@@ -22,13 +22,13 @@ def recommend_monster_v3(opponent_stats, df1):
         alasan = []
         if opponent_stats['Tendency'] == 2 and monster_stats['Tendency'] == 1:
             score += 10
-            alasan.append("Speed counter Power (Tendency)")
+            alasan.append("Speed counter Power (Tendency)\n")
         elif opponent_stats['Tendency'] == 3 and monster_stats['Tendency'] == 2:
             score += 10
-            alasan.append("Power counter Technique (Tendency)")
+            alasan.append("Power counter Technique (Tendency)\n")
         elif opponent_stats['Tendency'] == 1 and monster_stats['Tendency'] == 3:
             score += 10
-            alasan.append("Technique counter Speed (Tendency)")
+            alasan.append("Technique counter Speed (Tendency)\n")
         else:
             score -= 5
             alasan.append("Tidak meng-counter tendency musuh")
@@ -41,7 +41,7 @@ def recommend_monster_v3(opponent_stats, df1):
         }
         highest_attack_value = attack_values[lowest_resistance]
         score += highest_attack_value
-        alasan.append(f"Musuh memiliki resistance terendah terhadap {lowest_resistance},\nattack monster = {highest_attack_value}")
+        alasan.append(f"Musuh memiliki resistance terendah terhadap {lowest_resistance}\n ,attack monster = {highest_attack_value}")
         rankings.append((row['Monster'], score, "; ".join(alasan)))
     rankings.sort(key=lambda x: x[1], reverse=True)
     return rankings[:5]
