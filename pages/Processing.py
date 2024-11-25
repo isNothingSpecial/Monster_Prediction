@@ -50,7 +50,7 @@ def find_closest_monster(input_stats, df1):
     base_stats = ["HP", "Attack", "Defence", "Speed"]
     min_distance = float('inf')
     closest_monster = None
-    for _, row in df.iterrows():
+    for _, row in df1.iterrows():
         monster_stats = row[base_stats].values
         distance = euclidean(
             [input_stats[stat] for stat in base_stats],
