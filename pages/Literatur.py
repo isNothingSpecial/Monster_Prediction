@@ -34,6 +34,13 @@ resistance_stats_chart_path = f"Res_Stat/{monster_name}.png"
 literatur_options = ['Monster Description', 'Loot', 'Armor and Weapon Obtained', 'Egg and Habitat']
 literatur = st.selectbox('Pilih Literatur yang ingin Anda ketahui', literatur_options)
 
+st.markdown(
+    """
+    <h1 style='text-align: center;'>LITERATUR</h1>
+    """, 
+    unsafe_allow_html=True
+)
+
 # Tampilkan konten berdasarkan literatur
 if literatur == 'Monster Description':
     st.title(f"Monster: {monster_name}")
