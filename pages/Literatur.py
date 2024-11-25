@@ -63,7 +63,7 @@ if literatur == 'Monster Description':
 
     with col4:
         for stat in stats_basic:
-        st.write(f"**{stat}:** {monster[stat]}")  # Menampilkan notasi stat dasar
+            st.write(f"**{stat}:** {monster[stat]}")  # Menampilkan notasi stat dasar
 
 # Grid untuk Attack
     st.subheader("Statistik Attack Element")
@@ -75,7 +75,7 @@ if literatur == 'Monster Description':
 
     with col6:
         for stat in stats_attack:
-        st.write(f"**{stat.replace('Att_', 'Attack ')}:** {monster[stat]}")  # Menampilkan notasi attack element
+            st.write(f"**{stat.replace('Att_', 'Attack ')}:** {monster[stat]}")  # Menampilkan notasi attack element
 
 # Grid untuk Resistance
 st.subheader("Statistik Resistance Element")
@@ -112,7 +112,7 @@ col7, col8 = st.columns(2)
 
     with col4:
         for stat in stats_basic:
-        st.write(f"**{stat}:** {monster[stat]}")  # Menampilkan notasi stat dasar
+            st.write(f"**{stat}:** {monster[stat]}")  # Menampilkan notasi stat dasar
 
 # Grid untuk Attack
 st.subheader("Statistik Attack Element")
@@ -124,7 +124,7 @@ col5, col6 = st.columns(2)
 
     with col6:
         for stat in stats_attack:
-        st.write(f"**{stat.replace('Att_', 'Attack ')}:** {monster[stat]}")  # Menampilkan notasi attack element
+            st.write(f"**{stat.replace('Att_', 'Attack ')}:** {monster[stat]}")  # Menampilkan notasi attack element
 
 # Grid untuk Resistance
 st.subheader("Statistik Resistance Element")
