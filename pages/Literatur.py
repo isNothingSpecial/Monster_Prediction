@@ -20,7 +20,8 @@ monster_name = st.sidebar.selectbox(
 monster = monster_data[monster_data['Monster'] == monster_name].iloc[0]
 description = monster_description[monster_description['Monster'] == monster_name]['Monster'].values[0]
 tendency = tendency_map[monster['Tendency']]
-stats_basic = ["HP", "Attack", "Defence", "Speed"]
+
+# Statistik Elemen
 stats_attack = ["Att_Fire", "Att_Water", "Att_Thunder", "Att_Ice", "Att_Dragon"]
 stats_resist = ["Res_Fire", "Res_Water", "Res_Thunder", "Res_Ice", "Res_Dragon"]
 
@@ -35,13 +36,6 @@ monster_image_path = f"Monslist/{monster_name}.webp"
 basic_stats_chart_path = f"Basic_Stat/{monster_name}.png"
 attack_stats_chart_path = f"Att_Stat/{monster_name}.png"
 resistance_stats_chart_path = f"Res_Stat/{monster_name}.png"
-
-st.markdown(
-    """
-    <h1 style='text-align: center;'>LITERATUR</h1>
-    """, 
-    unsafe_allow_html=True
-)
 
 # Dropdown untuk literatur
 literatur_options = ['Monster Description', 'Loot', 'Armor and Weapon Obtained', 'Egg and Habitat']
@@ -70,7 +64,7 @@ if literatur == 'Monster Description':
     with col3:
         st.image(basic_stats_chart_path, caption="Statistik Dasar", use_column_width=True)
     with col4:
-        for stat in stats_basic:
+        for stat in ["HP", "Attack", "Defence", "Speed"]:
             st.write(f"**{stat}:** {monster[stat]}")
 
     # Statistik Attack Element
@@ -90,15 +84,3 @@ if literatur == 'Monster Description':
     with col8:
         for stat in stats_resist:
             st.write(f"**{stat.replace('Res_', 'Resistance ')}:** {monster[stat]}")
-
-elif literatur == 'Loot':
-    st.title(f"Loot dari Monster: {monster_name}")
-    st.write("Informasi loot akan ditambahkan di sini.")
-
-elif literatur == 'Armor and Weapon Obtained':
-    st.title(f"Armor dan Weapon dari Monster: {monster_name}")
-    st.write("Informasi armor dan weapon akan ditambahkan di sini.")
-
-elif literatur == 'Egg and Habitat':
-    st.title(f"Egg dan Habitat dari Monster: {monster_name}")
-    st.write("Informasi egg dan habitat akan ditambahkan di sini.")
