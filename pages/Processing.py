@@ -79,4 +79,4 @@ if st.button("Cari Rekomendasi Monster"):
         st.write(f"Score: {score}")
         st.write(f"Alasan: {alasan}")
         # Menampilkan gambar monster, cek jika tidak ada gunakan default
-        image_path = f"{IMAGE_FOLDER}/{monster}.webp"
+        image_path = f"{IMAGE_FOLDER}/{Monster}.webp"
