@@ -76,7 +76,6 @@ if st.button("Cari Rekomendasi Monster"):
     st.subheader("Hasil Rekomendasi")
     for rank, (monster, score, alasan) in enumerate(rekomendasi, start=1):
         st.markdown(f"**{rank}. {monster}**")
-        st.image(monster_image_path, caption=f"{Monster}", use_column_width=True)
         st.write(f"Score: {score}")
         st.write(f"Alasan: {alasan}")
         # Menampilkan gambar monster, cek jika tidak ada gunakan default
