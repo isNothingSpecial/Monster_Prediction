@@ -86,7 +86,7 @@ opponent_stats = {
 
 # Proses Analisis
 if st.button("Cari Rekomendasi Monster"):
-    closest_monster = find_closest_monster(opponent_stats, df)
+    closest_monster = find_closest_monster(opponent_stats, df1)
     st.subheader("Hasil Identifikasi Monster Lawan")
     st.write(f"Monster lawan yang paling mirip: **{closest_monster['Monster']}**")
     
