@@ -99,7 +99,8 @@ if st.button("Dapatkan Rekomendasi"):
         else:
             for i, recom in enumerate(recommendations):
                 # Dapatkan path gambar dari DataFrame
-                image_path = df1[df1['Monster'] == recom['Monster']]['Image_Path'].iloc[0]
+                recommended_monster_info = df1[df1['Monster'] == recom['Monster']]['Image_Path'].iloc[0]
+                image_path = recommended_monster_info['Image_Path']
             # Menggunakan expander untuk tampilan yang lebih rapi
             for i, recom in enumerate(recommendations):
                 with st.expander(f"{i+1}. {recom['Monster']}"):
