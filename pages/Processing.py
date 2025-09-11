@@ -5,9 +5,11 @@ import os
 df= pd.read_csv('MHST_monsties.csv')
 df1 = df.drop(columns=['No'])
 
-# Fungsi rekomendasi (versi lengkap dari sebelumnya)
-def recommend_monster_v3(opponent_stats, df1):
-    rankings = []
+
+# --- FUNGSI REKOMENDASI (SAMA SEPERTI SEBELUMNYA) ---
+def find_weakness(monster_name, df1):
+    opponent_stats = df1[df1['Monster'] == monster_name].iloc[0]
+
     resistance_values = {
         'Fire': opponent_stats['Res_Fire'],
         'Water': opponent_stats['Res_Water'],
@@ -15,67 +17,89 @@ def recommend_monster_v3(opponent_stats, df1):
         'Ice': opponent_stats['Res_Ice'],
         'Dragon': opponent_stats['Res_Dragon']
     }
-    lowest_resistance = min(resistance_values, key=resistance_values.get)
-    for _, row in df1.iterrows():
-        monster_stats = row.drop('Monster').to_dict()
-        score = 0
-        alasan = []
-        if opponent_stats['Tendency'] == 2 and monster_stats['Tendency'] == 1:
-            score += 10
-            alasan.append("Speed counter Power (Tendency)")
-        elif opponent_stats['Tendency'] == 3 and monster_stats['Tendency'] == 2:
-            score += 10
-            alasan.append("Power counter Technique (Tendency)")
-        elif opponent_stats['Tendency'] == 1 and monster_stats['Tendency'] == 3:
-            score += 10
-            alasan.append("Technique counter Speed (Tendency)")
+    min_res_value = min(resistance_values.values())
+    weak_elements = [el for el, val in resistance_values.items() if val == min_res_value]
+
+    tendency_map = {1: 'Speed', 2: 'Power', 3: 'Technique'}
+    opponent_tendency = tendency_map.get(opponent_stats['Tendency'])
+    
+    if opponent_tendency == 'Speed':
+        counter_tendency = 'Technique'
+    elif opponent_tendency == 'Technique':
+        counter_tendency = 'Power'
+    else:
+        counter_tendency = 'Speed'
+        
+    return weak_elements, counter_tendency, opponent_stats
+
+def recommend_monsties(monster_name, df1):
+    try:
+        weak_elements, counter_tendency, _ = find_weakness(monster_name, df_monster)
+    except IndexError:
+        return "Monster not found."
+
+    tendency_map = {'Speed': 1, 'Power': 2, 'Technique': 3}
+    
+    counter_monsties = df1[df1['Tendency'] == tendency_map[counter_tendency]]
+    
+    recom_list = []
+    
+    for weak_el in weak_elements:
+        attack_col = f'Att_{weak_el}'
+        
+        if attack_col in counter_monsties.columns:
+            sorted_monsties = counter_monsties.sort_values(by=attack_col, ascending=False)
+            
+            for _, monstie in sorted_monsties.head(3).iterrows():
+                recom_list.append({
+                    'Monster': monstie['Monster'],
+                    'Attack Element': weak_el,
+                    'Attack Value': monstie[attack_col],
+                    'Tendency': counter_tendency
+                })
+    
+    unique_recoms = pd.DataFrame(recom_list).drop_duplicates(subset=['Monster']).to_dict('records')
+    
+    final_recoms = sorted(unique_recoms, key=lambda x: x['Attack Value'], reverse=True)
+    
+    if not final_recoms:
+        return "No suitable monsties found."
+    
+    return final_recoms
+
+# --- UI APLIKASI STREAMLIT ---
+st.title("Monster Hunter Stories: Sistem Rekomendasi Monstie")
+
+st.markdown("""
+Aplikasi ini membantu Anda menemukan monster pendamping (Monstie) terbaik untuk melawan monster target.
+Pilih monster yang ingin Anda lawan dari daftar di bawah ini.
+""")
+
+# Mendapatkan daftar nama monster dari DataFrame untuk dropdown
+monster_list = df1['Monster'].tolist()
+
+# Dropdown untuk memilih monster
+selected_monster = st.selectbox(
+    "Pilih monster lawan:",
+    options=monster_list
+)
+
+# Tombol untuk menjalankan rekomendasi
+if st.button("Dapatkan Rekomendasi"):
+    if selected_monster:
+        with st.spinner('Menganalisis kelemahan monster...'):
+            recommendations = recommend_monsties(selected_monster, df1)
+        
+        st.subheader(f"Rekomendasi untuk Melawan {selected_monster}:")
+        
+        if isinstance(recommendations, str):
+            st.error(recommendations)
         else:
-            score -= 5
-            alasan.append("Tidak meng-counter tendency musuh")
-        attack_values = {
-            'Fire': monster_stats['Att_Fire'],
-            'Water': monster_stats['Att_Water'],
-            'Thunder': monster_stats['Att_Thunder'],
-            'Ice': monster_stats['Att_Ice'],
-            'Dragon': monster_stats['Att_Dragon']
-        }
-        highest_attack_value = attack_values[lowest_resistance]
-        score += highest_attack_value
-        alasan.append(f"Musuh memiliki resistance terendah terhadap {lowest_resistance},Attack Element ({lowest_resistance}) dari {row['Monster']} = {highest_attack_value}")
-        rankings.append((row['Monster'], score, "; ".join(alasan)))
-    rankings.sort(key=lambda x: x[1], reverse=True)
-    return rankings[:5]
-
-# UI
-st.title("Rekomendasi Monster Terbaik")
-
-# Input data lawan
-st.sidebar.subheader("Input Statistik Monster Lawan")
-opponent_stats = {
-    "HP": st.sidebar.number_input("HP", value=5, min_value=0),
-    "Attack": st.sidebar.number_input("Attack", value=5, min_value=0),
-    "Defence": st.sidebar.number_input("Defence", value=5, min_value=0),
-    "Speed": st.sidebar.number_input("Speed", value=5, min_value=0),
-    "Att_Fire": st.sidebar.number_input("Attack Fire", value=5, min_value=0),
-    "Att_Water": st.sidebar.number_input("Attack Water", value=5, min_value=0),
-    "Att_Thunder": st.sidebar.number_input("Attack Thunder", value=5, min_value=0),
-    "Att_Ice": st.sidebar.number_input("Attack Ice", value=5, min_value=0),
-    "Att_Dragon": st.sidebar.number_input("Attack Dragon", value=5, min_value=0),
-    "Res_Fire": st.sidebar.number_input("Resistance Fire", value=5, min_value=0),
-    "Res_Water": st.sidebar.number_input("Resistance Water", value=5, min_value=0),
-    "Res_Thunder": st.sidebar.number_input("Resistance Thunder", value=5, min_value=0),
-    "Res_Ice": st.sidebar.number_input("Resistance Ice", value=5, min_value=0),
-    "Res_Dragon": st.sidebar.number_input("Resistance Dragon", value=5, min_value=0),
-    "Tendency": st.sidebar.selectbox("Tendency", [1, 2, 3], format_func=lambda x: {1: "Speed", 2: "Power", 3: "Technique"}[x])
-}
-
-# Proses Analisis
-if st.button("Cari Rekomendasi Monster"):
-    rekomendasi = recommend_monster_v3(opponent_stats, df1)
-    st.subheader("Hasil Rekomendasi")
-    for rank, (monster, score, alasan) in enumerate(rekomendasi, start=1):
-        st.markdown(f"**{rank}. {monster}**")
-        st.write(f"Score: {score}")
-        alasan_lines = alasan.split("; ")
-        formatted_alasan = "\n".join(alasan_lines)  # Memisahkan setiap alasan dengan newline
-        st.markdown(f"**Alasan:**\n{formatted_alasan}")
+            # Menggunakan expander untuk tampilan yang lebih rapi
+            for i, recom in enumerate(recommendations):
+                with st.expander(f"{i+1}. {recom['Monster']}"):
+                    st.write(f"**Tendensi yang direkomendasikan:** {recom['Tendency']}")
+                    st.write(f"**Elemen serangan terbaik:** {recom['Attack Element']}")
+                    st.write(f"**Nilai serangan:** {recom['Attack Value']}")
+                    st.markdown("---")
+                    st.write("Monster ini memiliki serangan yang kuat dan cocok secara strategi.")
