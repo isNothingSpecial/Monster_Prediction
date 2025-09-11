@@ -6,7 +6,7 @@ df= pd.read_csv('MHST_monsties.csv')
 df1 = df.drop(columns=['No'])
 
 # Tambahkan kolom 'Image_Path'
-df1['Image_Path'] = df1['Monster'].apply(lambda x: f'Monslist/{x}.webp')
+#df1['Image_Path'] = df1['Monster'].apply(lambda x: f'Monslist/{x}.webp')
 
 # --- FUNGSI REKOMENDASI (SAMA SEPERTI SEBELUMNYA) ---
 def find_weakness(monster_name, df1):
@@ -97,14 +97,14 @@ if st.button("Dapatkan Rekomendasi"):
         if isinstance(recommendations, str):
             st.error(recommendations)
         else:
-            for i, recom in enumerate(recommendations):
+            #for i, recom in enumerate(recommendations):
                 # Dapatkan path gambar dari DataFrame
-                recommended_monster_info = df1[df1['Monster'] == recom['Monster']]['Image_Path'].iloc[0]
-                image_path = recommended_monster_info['Image_Path']
+                #recommended_monster_info = df1[df1['Monster'] == recom['Monster']]['Image_Path'].iloc[0]
+                #image_path = recommended_monster_info['Image_Path']
             # Menggunakan expander untuk tampilan yang lebih rapi
             for i, recom in enumerate(recommendations):
                 with st.expander(f"{i+1}. {recom['Monster']}"):
-                    st.image(image_path, width=150)
+                    #st.image(image_path, width=150)
                     st.write(f"**Tendensi yang direkomendasikan:** {recom['Tendency']}")
                     st.write(f"**Elemen serangan terbaik:** {recom['Attack Element']}")
                     st.write(f"**Nilai serangan:** {recom['Attack Value']}")
