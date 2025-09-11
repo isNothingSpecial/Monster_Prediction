@@ -5,6 +5,8 @@ import os
 df= pd.read_csv('MHST_monsties.csv')
 df1 = df.drop(columns=['No'])
 
+# Tambahkan kolom 'Image_Path'
+df1['Image_Path'] = df1['Monster'].apply(lambda x: f'images/{x}.png')
 
 # --- FUNGSI REKOMENDASI (SAMA SEPERTI SEBELUMNYA) ---
 def find_weakness(monster_name, df1):
@@ -95,9 +97,13 @@ if st.button("Dapatkan Rekomendasi"):
         if isinstance(recommendations, str):
             st.error(recommendations)
         else:
+            for i, recom in enumerate(recommendations):
+                # Dapatkan path gambar dari DataFrame
+                image_path = df_monster[df_monster['Monster'] == recom['Monster']]['Image_Path'].iloc[0]
             # Menggunakan expander untuk tampilan yang lebih rapi
             for i, recom in enumerate(recommendations):
                 with st.expander(f"{i+1}. {recom['Monster']}"):
+                    st.image(image_path, width=150)
                     st.write(f"**Tendensi yang direkomendasikan:** {recom['Tendency']}")
                     st.write(f"**Elemen serangan terbaik:** {recom['Attack Element']}")
                     st.write(f"**Nilai serangan:** {recom['Attack Value']}")
