@@ -34,7 +34,7 @@ def find_weakness(monster_name, df1):
 
 def recommend_monsties(monster_name, df1):
     try:
-        weak_elements, counter_tendency, _ = find_weakness(monster_name, df_monster)
+        weak_elements, counter_tendency, _ = find_weakness(monster_name, df1)
     except IndexError:
         return "Monster not found."
 
