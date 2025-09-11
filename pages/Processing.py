@@ -6,7 +6,7 @@ df= pd.read_csv('MHST_monsties.csv')
 df1 = df.drop(columns=['No'])
 
 # Tambahkan kolom 'Image_Path'
-df1['Image_Path'] = df1['Monster'].apply(lambda x: f'images/{x}.png')
+df1['Image_Path'] = df1['Monster'].apply(lambda x: f'Monslist/{x}.png')
 
 # --- FUNGSI REKOMENDASI (SAMA SEPERTI SEBELUMNYA) ---
 def find_weakness(monster_name, df1):
