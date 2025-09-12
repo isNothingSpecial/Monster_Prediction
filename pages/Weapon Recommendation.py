@@ -81,7 +81,6 @@ if st.button("Dapatkan Rekomendasi Senjata"):
             recommendations = recommend_weapons(selected_monster, df2, df1)
 
         st.subheader(f"Rekomendasi Senjata untuk Melawan {selected_monster}:")
-
             for i, item in enumerate(recommendations):
                 weapon = item['senjata']
                 skor = item['skor']
