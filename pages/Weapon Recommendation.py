@@ -90,8 +90,8 @@ if st.button("Dapatkan Rekomendasi Senjata"):
              st.write(f"**Skor:** {skor:.0f}")
 
              # Detail statistik untuk transparansi
-            st.markdown("---")
-            st.write(f"**Attack Max:** {weapon['Attack Max']}")
-            st.write(f"**Elemen:** {weapon['Elemen']} (Nilai: {weapon['Nilai Elemen']})")
-            st.write(f"**Critical:** {weapon['Critical']}%")
-            st.write(f"**Skill:** {weapon['Skill']}")
+        st.markdown("---")
+        st.write(f"**Attack Max:** {weapon['Attack Max']}")
+        st.write(f"**Elemen:** {weapon['Elemen']} (Nilai: {weapon['Nilai Elemen']})")
+        st.write(f"**Critical:** {weapon['Critical']}%")
+        st.write(f"**Skill:** {weapon['Skill']}")
