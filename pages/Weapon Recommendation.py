@@ -85,7 +85,7 @@ if st.button("Dapatkan Rekomendasi Senjata"):
                 weapon = item['senjata']
                 skor = item['skor']
             
-            with st.expander(f"{i+1}. {weapon['Nama Senjata']}"):
+        with st.expander(f"{i+1}. {weapon['Nama Senjata']}"):
                 st.write(f"**Tipe Senjata:** {weapon['Tipe Senjata']}")
                 st.write(f"**Skor:** {skor:.0f}")
 
