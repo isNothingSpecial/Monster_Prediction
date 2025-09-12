@@ -82,16 +82,16 @@ if st.button("Dapatkan Rekomendasi Senjata"):
 
         st.subheader(f"Rekomendasi Senjata untuk Melawan {selected_monster}:")
         for i, item in enumerate(recommendations):
-                weapon = item['senjata']
-                skor = item['skor']
+            weapon = item['senjata']
+            skor = item['skor']
             
         with st.expander(f"{i+1}. {weapon['Nama Senjata']}"):
-                st.write(f"**Tipe Senjata:** {weapon['Tipe Senjata']}")
-                st.write(f"**Skor:** {skor:.0f}")
+             st.write(f"**Tipe Senjata:** {weapon['Tipe Senjata']}")
+             st.write(f"**Skor:** {skor:.0f}")
 
-                    # Detail statistik untuk transparansi
-                st.markdown("---")
-                st.write(f"**Attack Max:** {weapon['Attack Max']}")
-                st.write(f"**Elemen:** {weapon['Elemen']} (Nilai: {weapon['Nilai Elemen']})")
-                st.write(f"**Critical:** {weapon['Critical']}%")
-                st.write(f"**Skill:** {weapon['Skill']}")
+             # Detail statistik untuk transparansi
+            st.markdown("---")
+            st.write(f"**Attack Max:** {weapon['Attack Max']}")
+            st.write(f"**Elemen:** {weapon['Elemen']} (Nilai: {weapon['Nilai Elemen']})")
+            st.write(f"**Critical:** {weapon['Critical']}%")
+            st.write(f"**Skill:** {weapon['Skill']}")
