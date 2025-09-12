@@ -85,7 +85,7 @@ Aplikasi ini membantu Anda menemukan senjata terbaik untuk melawan monster targe
 Pilih monster yang ingin Anda lawan dari daftar di bawah ini.
 """)
 
-monster_list = df1['Monster'].tolist()
+monster_list = df_monster['Monster'].tolist()
 selected_monster = st.selectbox(
     "Pilih monster lawan:",
     options=monster_list
@@ -95,7 +95,7 @@ if st.button("Dapatkan Rekomendasi Senjata"):
     if selected_monster:
         with st.spinner('Menganalisis senjata...'):
             # Memanggil fungsi dengan nama variabel yang benar
-            recommendations = recommend_weapons(selected_monster, df2, df1)
+            recommendations = recommend_weapons(selected_monster, df_weapon, df_monster)
 
         st.subheader(f"Rekomendasi Senjata untuk Melawan {selected_monster}:")
         for i, item in enumerate(recommendations):
