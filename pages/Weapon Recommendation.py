@@ -81,7 +81,6 @@ def recommend_weapons(monster_name, df2, df1):
 
 # --- UI APLIKASI STREAMLIT ---
 st.title("Sistem Rekomendasi Senjata MH Stories 1")
-
 st.markdown("""
 Aplikasi ini membantu Anda menemukan senjata terbaik untuk melawan monster target.
 Pilih monster yang ingin Anda lawan.
