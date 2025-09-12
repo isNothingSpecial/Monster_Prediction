@@ -3,21 +3,38 @@ import pandas as pd
 
 # --- DEKLARASI DATASET CONTOH ---
 df= pd.read_csv('MHST_monsties.csv')
-df1 = df.drop(columns=['No'])
-df2 = pd.read_csv('Weapon Monster Hunter Stories.csv')
+df_monster = df.drop(columns=['No'])
+df_weapon = pd.read_csv('Weapon Monster Hunter Stories.csv')
 
-def find_weakness(monster_name, df1):
+def find_weakness(monster_name, df_monster):
     """
     Mengidentifikasi kelemahan elemen monster berdasarkan resistansi terendah dari DataFrame.
     """
-    opponent_stats = df1[df1['Monster'] == monster_name]
+    opponent_stats = df_monster[df_monster['Monster'] == monster_name]
     
     if opponent_stats.empty:
-        # Jika monster tidak ditemukan, kembalikan None dan string error
         return None, "Monster tidak ditemukan."
 
-    # Jika monster ditemukan, kembalikan Series
-    return opponent_stats.iloc[0], None
+    # Menggunakan .iloc[0] untuk mengakses baris tunggal sebagai Series
+    opponent_stats = opponent_stats.iloc[0]
+
+    resistance_values = {
+        'Fire': opponent_stats['Res_Fire'],
+        'Water': opponent_stats['Res_Water'],
+        'Thunder': opponent_stats['Res_Thunder'],
+        'Ice': opponent_stats['Res_Ice'],
+        'Dragon': opponent_stats['Res_Dragon']
+    }
+    
+    # Menemukan nilai resistansi terendah
+    min_res_value = min(resistance_values.values())
+    
+    # Mengidentifikasi elemen-elemen dengan resistansi terendah
+    kelemahan_elemen = [
+        element for element, value in resistance_values.items() if value == min_res_value
+    ]
+    
+    return kelemahan_elemen, opponent_stats
 
 def recommend_weapons(monster_name, df_weapon, df_monster):
     """
