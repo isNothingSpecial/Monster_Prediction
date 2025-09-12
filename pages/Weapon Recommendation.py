@@ -81,17 +81,16 @@ if st.button("Dapatkan Rekomendasi Senjata"):
             recommendations = recommend_weapons(selected_monster, df2, df1)
 
         st.subheader(f"Rekomendasi Senjata untuk Melawan {selected_monster}:")
-            for i, item in enumerate(recommendations):
+        for i, item in enumerate(recommendations):
                 weapon = item['senjata']
                 skor = item['skor']
-                
-                with st.expander(f"{i+1}. {weapon['Nama Senjata']}"):
-                    st.write(f"**Tipe Senjata:** {weapon['Tipe Senjata']}")
-                    st.write(f"**Skor:** {skor:.0f}")
+            with st.expander(f"{i+1}. {weapon['Nama Senjata']}"):
+                st.write(f"**Tipe Senjata:** {weapon['Tipe Senjata']}")
+                st.write(f"**Skor:** {skor:.0f}")
 
                     # Detail statistik untuk transparansi
-                    st.markdown("---")
-                    st.write(f"**Attack Max:** {weapon['Attack Max']}")
-                    st.write(f"**Elemen:** {weapon['Elemen']} (Nilai: {weapon['Nilai Elemen']})")
-                    st.write(f"**Critical:** {weapon['Critical']}%")
-                    st.write(f"**Skill:** {weapon['Skill']}")
+                st.markdown("---")
+                st.write(f"**Attack Max:** {weapon['Attack Max']}")
+                st.write(f"**Elemen:** {weapon['Elemen']} (Nilai: {weapon['Nilai Elemen']})")
+                st.write(f"**Critical:** {weapon['Critical']}%")
+                st.write(f"**Skill:** {weapon['Skill']}")
