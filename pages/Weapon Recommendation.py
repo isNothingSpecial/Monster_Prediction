@@ -19,21 +19,15 @@ def find_weakness(monster_name, df1):
     # Jika monster ditemukan, kembalikan Series
     return opponent_stats.iloc[0], None
 
-def recommend_weapons(monster_name, df2, df1):
+def recommend_weapons(monster_name, df_weapon, df_monster):
     """
     Merekomendasikan senjata terbaik untuk melawan monster tertentu dari DataFrame.
     """
-    # Gunakan fungsi helper untuk menemukan kelemahan dan data monster
-    # Menangkap kedua nilai kembalian
-    opponent_stats, error_message = find_weakness(monster_name, df1)
+    # Menggunakan fungsi helper untuk menemukan kelemahan dan data monster
+    kelemahan_elemen, opponent_stats = find_weakness(monster_name, df_monster)
     
-    # PERBAIKAN: Tambahkan pemeriksaan ini di sini
     if opponent_stats is None:
-        return error_message  # Mengembalikan pesan error jika monster tidak ditemukan
-
-    # Perbaikan: Konversi Tipe Data Numerik pada DataFrame
-    for col in ['Attack Max', 'Critical', 'Nilai Elemen']:
-        df2[col] = pd.to_numeric(df2[col], errors='coerce').fillna(0).astype(int)
+        return "Monster tidak ditemukan."
 
     # Definisikan bobot untuk setiap kriteria
     BOBOT_SKILL_SPESIFIK = 100
@@ -44,7 +38,7 @@ def recommend_weapons(monster_name, df2, df1):
     rekomendasi_senjata = []
     
     # Iterasi melalui setiap baris DataFrame senjata
-    for index, weapon in df2.iterrows():
+    for index, weapon in df_weapon.iterrows():
         skor = 0
         
         # Kriteria 1: Skill Spesifik
