@@ -1,0 +1,178 @@
+Nama Senjata,Tipe Senjata,Attack Dasar,Attack Max,Critical,Elemen,Nilai Elemen,Bonus Status Effect,Nilai Status,Skill
+Hunter's Knife,Sword And Shield,8,44,5%,Raw,0,None,0,Hunter Slash
+Fighter Sword,Sword And Shield,68,108,5%,Raw,0,None,0,Hunter Slash
+Hunter's Dagger,Sword And Shield,10,45,5%,Raw,0,Protection,5,High Smash
+Assassin's Daagger,Sword And Shield,78,110,5%,Raw,0,Protection,5,High Smash
+Bone Kris,Sword And Shield,18,54,5%,Raw,0,None,0,Flying Wyvern Slayer
+Chief Kris,Sword And Shield,73,108,5%,Raw,0,None,0,Flying Wyvern Slayer
+Sharkutter,Sword And Shield,25,65,5%,Ice,4,None,0,Ice Guard
+Sharkgutter,Sword And Shield,72,108,5%,Ice,8,None,0,Ice Guard
+Viper Bite,Sword And Shield,24,58,5%,Raw,0,Paralysis,12%,Leviathan Slayer
+Deathprize,Sword And Shield,70,110,5%,Raw,0,Paralysis,12%,Leviathan Slayer
+Ludroth's Nail,Sword And Shield,24,68,5%,Water,4,None,0,Water Guard
+Ludroth's Gear,Sword And Shield,78,110,5%,Water,8,None,0,Water Guard
+Princess Rapier,Sword And Shield,28,68,5%,Raw,0,Deadly Poison,18%,Fanged Wyvern Slayer
+Queen Rapier,Sword And Shield,80,112,5%,Raw,0,Deadly Poison,18%,Fanged Wyvern Slayer
+Carapace Mace,Sword And Shield,30,72,1%,Raw,0,None,0,Elder Dragon Slayer
+Barroth Club,Sword And Shield,88,120,1%,Raw,0,None,0,Elder Dragon Slayer
+Plesioth Finspike,Sword And Shield,22,62,5%,Raw,0,Sleep,12%,High Smash
+Plesioth Direspike,Sword And Shield,78,106,5%,Raw,0,Sleep,12%,High Smash
+Catspaw,Sword And Shield,40,67,5%,Raw,0,Paralysis,12%,Herbivore Slayer
+Catburglar,Sword And Shield,72,100,5%,Raw,0,Paralysis,12%,Herbivore Slayer
+Hydra Bite,Sword And Shield,38,62,5%,Raw,0,Poison,18%,Flying Wyvern Slayer
+Deadly Poison,Sword And Shield,73,108,5%,Raw,0,Poison,18%,Flying Wyvern Slayer
+Flame Syphos,Sword And Shield,38,62,5%,Fire,4,None,0,Fire Guard
+Black Doom Flame,Sword And Shield,80,112,5%,Fire,8,None,0,Fire Guard
+Gigas Club,Sword And Shield,35,65,5%,Raw,0,Protection,10,Fire Guard
+Gigas Crusher,Sword And Shield,80,105,5%,Raw,0,Protection,10,Fire Guard
+Eternal Strife,Sword And Shield,53,77,5%,Dragon,5,None,0,Dragon Guard
+Eternal Hate,Sword And Shield,86,112,5%,Dragon,8,None,0,Dragon Guard
+Soldier's Dagger,Sword And Shield,51,71,5%,Raw,0,None,0,Herbivore Slayer
+Commander Dagger,Sword And Shield,80,108,5%,Raw,0,None,0,Herbivore Slayer
+Usurper's Firebolt,Sword And Shield,50,74,5%,Thunder,5,None,0,Thunder Guard
+Despot's Crookbolt,Sword And Shield,80,112,5%,Thunder,8,None,0,Thunder Guard
+Hidden Edge,Sword And Shield,48,72,10%,Raw,0,None,0,Hunter Slash
+Flash in the Night,Sword And Shield,80,106,5%,Raw,0,None,0,Hunter Slash
+Blazing Falchion,Sword And Shield,60,72,5%,Fire,5,None,0,Hunter Slash
+Golden Falchion,Sword And Shield,80,116,5%,Fire,8,None,0,Hunter Slash
+Rajang Club,Sword And Shield,68,82,5%,Thunder,5,None,0,Thunder Guard
+Banned Rajang Club,Sword And Shield,90,116,5%,Thunder,8,None,0,Thunder Guard
+Kirin Bolt,Sword And Shield,78,110,5%,Thunder,8,None,0,Thunder Guard
+Crimson Club,Sword And Shield,54,118,5%,Raw,0,None,0,High Smash
+Daora's Razor,Sword And Shield,82,112,5%,Ice,8,None,0,Ice Guard
+Teostra's Spada,Sword And Shield,88,116,5%,Fire,8,Blastblight,18%,Fire Guard
+Fatalis Sword,Sword And Shield,97,121,5%,Dragon,8,None,0,Dragon Guard
+Inazuma Works,Sword And Shield,28,60,5%,Thunder,5,None,0,Thunder Guard
+Ikazuchi Works,Sword And Shield,75,111,5%,Thunder,8,None,0,Thunder Guard
+Burning Prominar,Sword And Shield,48,68,5%,Fire,5,None,0,Fire Guard
+Glinting Glavenus,Sword And Shield,46,112,5%,Fire,8,None,0,Fire Guard
+Odyssey,Sword And Shield,28,52,5%,Water,5,None,0,Water Guard
+Odyssey Blade,Sword And Shield,82,110,5%,Water,8,None,0,Water Guard
+Iron Sword,Great Sword,9,50,3%,Raw,0,None,0,None
+Carbalite Sword,Great Sword,75,115,3%,Raw,0,None,0,None
+Defender,Great Sword,12,52,3%,Raw,0,Protection,5,Nimble Slash
+Sentinel,Great Sword,75,115,3%,Raw,0,Protection,10,Nimble Slash
+Bone Cleaver,Great Sword,22,55,3%,Raw,0,None,0,Fanged Beast Hunter
+Bone Slasher,Great Sword,80,115,3%,Raw,0,None,0,Fanged Beast Hunter
+Jawblade,Great Sword,29,63,3%,Raw,0,None,0,Bird Wyvern Hunter
+Giant Jawblade,Great Sword,75,115,3%,Raw,0,None,0,Bird Wyvern Hunter
+Azure Serpentblade,Great Sword,30,62,3%,Raw,0,None,0,Nimble Slash
+Vile Serpentblade,Great Sword,78,114,3%,Raw,0,None,0,Nimble Slash
+Decapitator,Great Sword,31,51,3%,Fire,2,None,0,Flame Slash
+Rooster Decapitator,Great Sword,80,112,3%,Fire,8,None,0,Flame Slash
+Khezu Shock Sword,Great Sword,31,62,3%,Thunder,4,None,0,Thunder Slash
+Khezu Shock Blade,Great Sword,78,114,3%,Thunder,8,None,0,Thunder Slash
+Scylla Blade,Great Sword,31,65,3%,Raw,0,Sleep,10%,Bird Wyvern Hunter
+Scylla Razor,Great Sword,82,114,3%,Raw,0,Sleep,10%,Bird Wyvern Hunter
+Red Pincer,Great Sword,30,61,3%,Raw,0,Protection,5,Water Slash
+Great Pincer,Great Sword,78,114,3%,Raw,0,Protection,10,Water Slash
+Cera Cigil,Great Sword,39,63,3%,Raw,0,None,0,Nimble Slash
+Cera Cymmetry,Great Sword,80,120,3%,Raw,0,None,0,Nimble Slash
+Tiger Jawblade,Great Sword,40,67,0%,Raw,0,None,0,Brute Wyvern Hunter
+Tiger Great Sword,Great Sword,92,128,0%,Raw,0,None,0,Brute Wyvern Hunter
+Finblade,Great Sword,33,74,3%,Water,5,None,0,Water Slash
+Ples Watercutter,Great Sword,85,117,3%,Water,8,None,0,Water Slash
+Ravager Blade,Great Sword,45,65,3%,Raw,0,None,0,Dragon Slash
+Raging Blade,Great Sword,82,116,3%,Raw,0,None,0,Dragon Slash
+Chieftain Great Sword,Great Sword,55,75,3%,Raw,0,None,0,Fanged Beast Hunter
+High Chieftain Great Sword,Great Sword,84,116,3%,Raw,0,None,0,Fanged Beast Hunter
+Cat's Soul,Great Sword,46,62,3%,Raw,0,Paralysis,10%,Neopteron Hunter
+Cat's Curse,Great Sword,72,108,3%,Raw,0,Paralysis,10%,Neopteron Hunter
+Thrash Sword,Great Sword,51,75,3%,Water,4,None,0,Water Slash
+Thrash Cutlass,Great Sword,85,117,3%,Water,8,None,0,Water Slash
+Rathalos Firesword,Great Sword,59,79,3%,Fire,5,None,0,Flame Slash
+Rathalos Gleamsword,Great Sword,92,124,3%,Fire,8,None,0,Flame Slash
+Lagiacrus Blade,Great Sword,66,76,3%,Thunder,5,None,0,Thunder Slash
+Lagia Lightning,Great Sword,90,124,3%,Thunder,8,None,0,Thunder Slash
+Berserker Sword,Great Sword,70,80,3%,Dragon,5,None,0,Dragon Slash
+Anguish,Great Sword,91,123,3%,Dragon,8,None,0,Dragon Slash
+Icicle Fang,Great Sword,69,79,3%,Ice,5,None,0,Ice Slash
+Paladire,Great Sword,90,122,3%,Ice,8,None,0,Ice Slash
+Demon Rod,Great Sword,71,81,3%,Thunder,8,None,0,Thunder Slash
+Great Demon Rod,Great Sword,92,124,3%,Thunder,8,None,0,Thunder Slash
+Cheda Blade,Great Sword,78,126,3%,Raw,0,None,0,Brute Wyvern Hunter
+Daora's Decimator,Great Sword,95,123,3%,Ice,8,None,0,Ice Slash
+Teostra's Blade,Great Sword,91,119,3%,Fire,8,Blastblight,15%,Flame Slash
+Fatalis Blade,Great Sword,106,130,3%,Dragon,8,None,0,Dragon Slash
+Scorching Blazer,Great Sword,60,75,3%,Fire,5,None,0,Flame Slash
+Glavenus Array,Great Sword,88,112,3%,Fire,8,None,0,Flame Slash
+Fox Blade,Great Sword,30,60,3%,Thunder,5,None,0,Thunder Slash
+Discov Corps Blade,Great Sword,78,106,3%,Thunder,8,None,0,Thunder Slash
+Captain Blade J,Great Sword,32,54,3%,Raw,0,Blastblight,15%,Brute Wyvern Hunter
+Captain Buster J,Great Sword,84,116,3%,Raw,0,Blastblight,15%,Brute Wyvern Hunter
+Chrome Razor,Great Sword,42,62,3%,Raw,0,Deadly Poison,20%,Nimble Slash
+Chrome Quietus,Great Sword,78,114,3%,Raw,0,Deadly Poison,20%,Nimble Slash
+War Hammer,Hammer,38,58,2%,Raw,0,None,0,Smash!
+War Mace,Hammer,75,111,2%,Raw,0,None,0,Smash!
+Bull Head Hammer,Hammer,32,57,2%,Raw,0,None,0,Body Crush!
+Bull Tusk Hammer,Hammer,80,112,2%,Raw,0,None,0,Body Crush!
+Meaty Smash,Hammer,30,72,2%,Ice,4,None,0,Frost Smash!
+Meaty Crush,Hammer,80,118,2%,Ice,8,None,0,Frost Smash!
+Venom Monster,Hammer,31,71,2%,Raw,0,Poison,15%,Body Crush!
+Pitohui Bird Mace,Hammer,82,114,2%,Raw,0,Poison,15%,Body Crush!
+Plume Flint,Hammer,30,55,2%,Fire,3,None,0,Burn Smash!
+Peco Flint,Hammer,75,111,2%,Fire,8,None,0,Burn Smash!
+Striped Striker,Hammer,40,72,0%,Raw,0,None,0,Arm Crush!
+Tigrex Hammer,Hammer,94,126,0%,Raw,0,None,0,Arm Crush!
+Plesioth Head,Hammer,35,73,2%,Water,5,None,0,Aqua Smash!
+Plesioth Breaker,Hammer,82,114,2%,Water,8,None,0,Aqua Smash!
+White Kitty Stamp,Hammer,48,68,2%,Raw,0,Paralysis,10%,Smash!
+White Kitty Hammer,Hammer,70,106,2%,Raw,0,Paralysis,10%,Smash!
+Basarios Blow,Hammer,42,70,2%,Raw,0,Protection,10,Leg Crush!
+Basarios Bash,Hammer,80,112,2%,Raw,0,Protection,10,Leg Crush!
+Raven Torrent,Hammer,53,78,5%,Raw,0,None,0,Arm Crush!
+Wolf Torrent,Hammer,85,117,5%,Raw,0,None,0,Arm Crush!
+Red Bludgeon,Hammer,66,75,2%,Fire,5,None,0,Burn Smash!
+Leonid Starcrusher,Hammer,100,124,2%,Fire,8,None,0,Burn Smash!
+Vortex Hammer,Hammer,70,82,2%,Thunder,5,None,0,Thunder Smash!
+High Vortex Hammer,Hammer,92,121,2%,Thunder,8,None,0,Thunder Smash!
+Devil's Due,Hammer,67,82,2%,Dragon,5,None,0,Dragon Smash!
+Devil's Crush,Hammer,90,118,2%,Dragon,8,None,0,Dragon Smash!
+Dios Tailhammer,Hammer,72,84,2%,Raw,0,Blastblight,15%,Smash!
+Dios Blastmace,Hammer,95,119,2%,Raw,0,Blastblight,15%,Smash!
+Mane Malice,Hammer,75,89,2%,Thunder,5,None,0,Thunder Smash!
+Mane Malice Rajang,Hammer,99,123,2%,Thunder,8,None,0,Thunder Smash!
+Daora's Colossus,Hammer,88,120,2%,Ice,8,None,0,Frost Smash!
+Teostra Cratermakr,Hammer,92,124,2%,Fire,8,Blastblight,15%,Brave Blow!
+Fatalis Buster,Hammer,110,130,2%,Dragon,8,None,0,Dragon Smash!
+Jupiter's Sphere,Hammer,90,114,2%,Water,8,None,0,Leg Crush!
+Teddybear,Hammer,70,110,2%,Raw,0,Sleep,10%,Arm Crush!
+Bone Horn,Hunting Horn,28,53,4%,Raw,0,None,0,Soft Rock
+Hardened Bone Horn,Hunting Horn,74,110,4%,Raw,0,None,0,Soft Rock
+Magia Charm,Hunting Horn,28,68,4%,Dragon,3,None,0,Sonata of Renewal
+Magia Charmbell,Hunting Horn,78,116,4%,Dragon,8,None,0,Sonata of Renewal
+Sonic Glass,Hunting Horn,26,54,4%,Raw,0,Paralysis,10%,Waltz of Cleansing
+Glass Queen,Hunting Horn,72,112,4%,Raw,0,Paralysis,10%,Waltz of Cleansing
+Zurogong Primo,Hunting Horn,28,52,4%,Raw,0,None,0,Shielding Yodel
+Zurogong Secundo,Hunting Horn,75,111,4%,Raw,0,None,0,Shielding Yodel
+Khezu Horn,Hunting Horn,28,58,4%,Thunder,4,None,0,Tango of Vivacity
+Khezu Flute,Hunting Horn,75,115,4%,Thunder,8,None,0,Tango of Vivacity
+Droth Drone,Hunting Horn,29,53,4%,Water,4,None,0,Arctic Blues
+Droth Roar,Hunting Horn,78,110,4%,Water,8,None,0,Arctic Blues
+Valkryie Chordmaker,Hunting Horn,36,66,4%,Fire,5,None,0,Tango of Vivacity
+Gold Chordmaker,Hunting Horn,76,116,4%,Fire,8,None,0,Tango of Vivacity
+Brazengaita,Hunting Horn,40,65,4%,Raw,0,Protection,10,Rondo of Fortitude
+Gigas Gaita,Hunting Horn,75,105,4%,Raw,0,Protection,10,Rondo of Fortitude
+Agnakdion,Hunting Horn,45,76,4%,Fire,5,None,0,Sultry Bossa Nova
+Brandoneon,Hunting Horn,82,118,4%,Fire,8,None,0,Sultry Bossa Nova
+Kecha Whappa,Hunting Horn,46,70,4%,Water,4,None,0,Samba of Swiftness
+Kecha Kewhappa,Hunting Horn,82,112,4%,Water,8,None,0,Samba of Swiftness
+Raven Shamisen,Hunting Horn,46,70,4%,Raw,0,Poison,15%,Acid Jazz
+Wolf Shamisen,Hunting Horn,82,114,4%,Raw,0,Poison,15%,Acid Jazz
+War Drum,Hunting Horn,55,75,4%,Raw,0,None,0,March of Aggression
+Crusade Drum,Hunting Horn,83,115,4%,Raw,0,None,0,March of Aggression
+Usurper's Grow!,Hunting Horn,55,70,4%,Thunder,5,None,0,Samba of Swiftness
+Despot Thunderclap,Hunting Horn,82,114,4%,Thunder,8,None,0,Samba of Swiftness
+Beating Gunrock,Hunting Horn,55,75,4%,Raw,0,Sleep,10%,Mystifying Encore
+Fleeting Gunrock,Hunting Horn,80,115,4%,Raw,0,Sleep,10%,Mystifying Encore
+Hidden Harmonic,Hunting Horn,58,68,8%,Raw,0,None,0,Samba of Swiftness
+Cry in the Night,Hunting Horn,80,112,8%,Raw,0,None,0,Samba of Swiftness
+Bariguiro,Hunting Horn,60,72,4%,Ice,5,None,0,Heavy Metal
+Algiguiro,Hunting Horn,84,112,4%,Ice,8,None,0,Heavy Metal
+Dios Bell,Hunting Horn,68,82,4%,Raw,0,Blastblight,15%,Dissonance
+Napalm Bell,Hunting Horn,89,117,4%,Raw,0,Blastblight,15%,Dissonance
+Denden Daiko,Hunting Horn,70,86,4%,Thunder,5,None,0,March of Aggression
+Denden Doomsounder,Hunting Horn,94,118,4%,Thunder,8,None,0,March of Aggression
+Daora's Taus,Hunting Horn,92,120,4%,Ice,8,None,0,Harmonius Duet
+Teostra's Tiple,Hunting Horn,88,120,4%,Fire,8,Blastblight,15%,Resonant Symphony
+Fatalis Menace,Hunting Horn,98,124,4%,Dragon,8,None,0%,Ska Punk
