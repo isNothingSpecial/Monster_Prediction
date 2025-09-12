@@ -23,16 +23,13 @@ def find_weakness(monster_name, df1):
     
     return weak_elements, opponent_stats
 
-def recommend_weapons(monster_name, df2, df1, max_rarity=None):
+def recommend_weapons(monster_name, df2, df1):
     kelemahan_elemen, opponent_stats = find_weakness(monster_name, df1)
     
-    # Filter berdasarkan rarity jika max_rarity diberikan
-    if max_rarity:
-        filtered_df2 = df2[df2['Rarity'] <= max_rarity].copy()
-    else:
-        filtered_df2 = df2.copy()
+    # Gunakan DataFrame penuh tanpa filter rarity
+    filtered_df2 = df2.copy()
 
-    # PERBAIKAN: Konversi Tipe Data Numerik pada DataFrame yang sudah difilter
+    # Perbaikan: Konversi Tipe Data Numerik pada DataFrame yang sudah difilter
     for col in ['Attack Max', 'Critical', 'Nilai Elemen']:
         filtered_df2[col] = pd.to_numeric(filtered_df2[col], errors='coerce').fillna(0).astype(int)
 
@@ -67,30 +64,19 @@ st.title("Sistem Rekomendasi Senjata MH Stories 1")
 
 st.markdown("""
 Aplikasi ini membantu Anda menemukan senjata terbaik untuk melawan monster target.
-Pilih monster yang ingin Anda lawan dan rarity tertinggi dari senjata yang dapat Anda buat saat ini.
+Pilih monster yang ingin Anda lawan.
 """)
 
-col1, col2 = st.columns(2)
-
-with col1:
-    monster_list = df1['Monster'].tolist()
-    selected_monster = st.selectbox(
-        "Pilih monster lawan:",
-        options=monster_list
-    )
-
-with col2:
-    rarity_options = sorted(df2['Rarity'].unique())
-    selected_rarity = st.selectbox(
-        "Rarity senjata tertinggi yang bisa Anda buat:",
-        options=rarity_options,
-        index=len(rarity_options)-1 # Default ke rarity tertinggi
-    )
+monster_list = df1['Monster'].tolist()
+selected_monster = st.selectbox(
+    "Pilih monster lawan:",
+    options=monster_list
+)
 
 if st.button("Dapatkan Rekomendasi Senjata"):
     if selected_monster:
         with st.spinner('Menganalisis senjata...'):
-            recommendations = recommend_weapons(selected_monster, df2, df1, max_rarity=selected_rarity)
+            recommendations = recommend_weapons(selected_monster, df2, df1)
 
         st.subheader(f"Rekomendasi Senjata untuk Melawan {selected_monster}:")
         
