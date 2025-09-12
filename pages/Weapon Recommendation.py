@@ -9,7 +9,16 @@ df2 = pd.read_csv('Weapon Monster Hunter Stories.csv')
 # --- FUNGSI REKOMENDASI SENJATA ---
 
 def find_weakness(monster_name, df1):
-    opponent_stats = df1[df1['Monster'] == monster_name].iloc[0]
+    """
+    Mengidentifikasi kelemahan elemen monster berdasarkan resistansi terendah dari DataFrame.
+    """
+    opponent_stats = df1[df1['Monster'] == monster_name]
+    
+    if opponent_stats.empty:
+        return None, "Monster tidak ditemukan."
+
+    # Menggunakan .iloc[0] untuk mengakses baris tunggal sebagai Series
+    opponent_stats = opponent_stats.iloc[0]
 
     resistance_values = {
         'Fire': opponent_stats['Res_Fire'],
@@ -18,10 +27,16 @@ def find_weakness(monster_name, df1):
         'Ice': opponent_stats['Res_Ice'],
         'Dragon': opponent_stats['Res_Dragon']
     }
-    min_res_value = min(resistance_values.values())
-    weak_elements = [el for el, val in resistance_values.items() if val == min_res_value]
     
-    return weak_elements, opponent_stats
+    # Menemukan nilai resistansi terendah
+    min_res_value = min(resistance_values.values())
+    
+    # Mengidentifikasi elemen-elemen dengan resistansi terendah
+    kelemahan_elemen = [
+        element for element, value in resistance_values.items() if value == min_res_value
+    ]
+    
+    return kelemahan_elemen, opponent_stats
 
 def recommend_weapons(monster_name, df2, df1):
     """
