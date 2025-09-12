@@ -7,7 +7,6 @@ df1 = df.drop(columns=['No'])
 df2 = pd.read_csv('Weapon Monster Hunter Stories.csv')
 
 # --- FUNGSI REKOMENDASI SENJATA ---
-
 def find_weakness(monster_name, df1):
     """
     Mengidentifikasi kelemahan elemen monster berdasarkan resistansi terendah dari DataFrame.
@@ -48,6 +47,10 @@ def recommend_weapons(monster_name, df2, df1):
     if opponent_stats is None:
         return "Monster tidak ditemukan."
 
+    # Perbaikan: Konversi Tipe Data Numerik pada DataFrame
+    for col in ['Attack Max', 'Critical', 'Nilai Elemen']:
+        df2[col] = pd.to_numeric(df2[col], errors='coerce').fillna(0).astype(int)
+
     # Definisikan bobot untuk setiap kriteria
     BOBOT_SKILL_SPESIFIK = 100
     BOBOT_ELEMEN_KELEMAHAN = 50
@@ -81,9 +84,10 @@ def recommend_weapons(monster_name, df2, df1):
 
 # --- UI APLIKASI STREAMLIT ---
 st.title("Sistem Rekomendasi Senjata MH Stories 1")
+
 st.markdown("""
 Aplikasi ini membantu Anda menemukan senjata terbaik untuk melawan monster target.
-Pilih monster yang ingin Anda lawan.
+Pilih monster yang ingin Anda lawan dari daftar di bawah ini.
 """)
 
 monster_list = df1['Monster'].tolist()
@@ -103,14 +107,8 @@ if st.button("Dapatkan Rekomendasi Senjata"):
             weapon = item['senjata']
             skor = item['skor']
 
-            # Cek evolusi
-            is_evolution = pd.notna(weapon['Prasyarat Evolusi'])
-            prasyarat_text = f"Evolusi dari: **{weapon['Prasyarat Evolusi']}**" if is_evolution else "Senjata dasar"
-
             with st.expander(f"{i+1}. {weapon['Nama Senjata']}"):
                 st.write(f"**Tipe Senjata:** {weapon['Tipe Senjata']}")
-                st.write(f"**Tingkat Kelangkaan (Rarity):** {weapon['Rarity']}")
-                st.write(f"**Rekomendasi ini adalah:** {prasyarat_text}")
                 st.write(f"**Skor:** {skor:.0f}")
 
                 # Detail statistik untuk transparansi
