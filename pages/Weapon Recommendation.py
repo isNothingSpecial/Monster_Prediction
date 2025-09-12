@@ -82,9 +82,6 @@ if st.button("Dapatkan Rekomendasi Senjata"):
 
         st.subheader(f"Rekomendasi Senjata untuk Melawan {selected_monster}:")
         
-        # Menangani output jika berupa string error
-        if isinstance(recommendations, str):
-            st.error(recommendations)
         else:
             for i, item in enumerate(recommendations):
                 weapon = item['senjata']
