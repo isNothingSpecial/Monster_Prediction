@@ -7,9 +7,17 @@ df1 = df.drop(columns=['No'])
 df2 = pd.read_csv('Weapon Monster Hunter Stories.csv')
 
 # --- FUNGSI REKOMENDASI SENJATA ---
-
 def find_weakness(monster_name, df1):
-    opponent_stats = df1[df1['Monster'] == monster_name].iloc[0]
+    """
+    Mengidentifikasi kelemahan elemen monster berdasarkan resistansi terendah dari DataFrame.
+    """
+    opponent_stats = df1[df1['Monster'] == monster_name]
+    
+    if opponent_stats.empty:
+        return None, "Monster tidak ditemukan."
+
+    # Menggunakan .iloc[0] untuk mengakses baris tunggal sebagai Series
+    opponent_stats = opponent_stats.iloc[0]
 
     resistance_values = {
         'Fire': opponent_stats['Res_Fire'],
@@ -18,47 +26,59 @@ def find_weakness(monster_name, df1):
         'Ice': opponent_stats['Res_Ice'],
         'Dragon': opponent_stats['Res_Dragon']
     }
-    min_res_value = min(resistance_values.values())
-    weak_elements = [el for el, val in resistance_values.items() if val == min_res_value]
     
-    return weak_elements, opponent_stats
+    # Menemukan nilai resistansi terendah
+    min_res_value = min(resistance_values.values())
+    
+    # Mengidentifikasi elemen-elemen dengan resistansi terendah
+    kelemahan_elemen = [
+        element for element, value in resistance_values.items() if value == min_res_value
+    ]
+    
+    return kelemahan_elemen, opponent_stats
 
-def recommend_weapons(monster_name, df2, df1, max_rarity=None):
+def recommend_weapons(monster_name, df2, df1):
+    """
+    Merekomendasikan senjata terbaik untuk melawan monster tertentu dari DataFrame.
+    """
+    # Menggunakan fungsi helper untuk menemukan kelemahan dan data monster
     kelemahan_elemen, opponent_stats = find_weakness(monster_name, df1)
     
-    # Filter berdasarkan rarity jika max_rarity diberikan
-    if max_rarity:
-        filtered_df2 = df2[df2['Rarity'] <= max_rarity].copy()
-    else:
-        filtered_df2 = df2.copy()
+    if opponent_stats is None:
+        return "Monster tidak ditemukan."
 
-    # PERBAIKAN: Konversi Tipe Data Numerik pada DataFrame yang sudah difilter
+    # Perbaikan: Konversi Tipe Data Numerik pada DataFrame
     for col in ['Attack Max', 'Critical', 'Nilai Elemen']:
-        filtered_df2[col] = pd.to_numeric(filtered_df2[col], errors='coerce').fillna(0).astype(int)
+        df2[col] = pd.to_numeric(df2[col], errors='coerce').fillna(0).astype(int)
 
     # Definisikan bobot untuk setiap kriteria
     BOBOT_SKILL_SPESIFIK = 100
     BOBOT_ELEMEN_KELEMAHAN = 50
     BOBOT_ATTACK = 1
     BOBOT_NILAI_ELEMEN = 5
-    
+
     rekomendasi_senjata = []
     
-    for index, weapon in filtered_df2.iterrows():
+    # Iterasi melalui setiap baris DataFrame senjata
+    for index, weapon in df2.iterrows():
         skor = 0
         
+        # Kriteria 1: Skill Spesifik
         tipe_monster_str = opponent_stats['Type Monster'].replace(' ', '_').lower() + '_slayer'
         if pd.notna(weapon.get('Skill')) and tipe_monster_str in weapon['Skill'].lower():
             skor += BOBOT_SKILL_SPESIFIK
 
+        # Kriteria 2: Elemen Kelemahan
         if pd.notna(weapon.get('Elemen')) and weapon['Elemen'].capitalize() in kelemahan_elemen:
             skor += BOBOT_ELEMEN_KELEMAHAN
             skor += weapon.get('Nilai Elemen', 0) * BOBOT_NILAI_ELEMEN
 
+        # Kriteria 3: Statistik Dasar
         skor += weapon.get('Attack Max', 0) * BOBOT_ATTACK
-        
+
         rekomendasi_senjata.append({'senjata': weapon.to_dict(), 'skor': skor})
 
+    # Urutkan senjata berdasarkan skor
     rekomendasi_senjata_sorted = sorted(rekomendasi_senjata, key=lambda x: x['skor'], reverse=True)
     return rekomendasi_senjata_sorted[:10]
 
@@ -67,30 +87,19 @@ st.title("Sistem Rekomendasi Senjata MH Stories 1")
 
 st.markdown("""
 Aplikasi ini membantu Anda menemukan senjata terbaik untuk melawan monster target.
-Pilih monster yang ingin Anda lawan dan rarity tertinggi dari senjata yang dapat Anda buat saat ini.
+Pilih monster yang ingin Anda lawan dari daftar di bawah ini.
 """)
 
-col1, col2 = st.columns(2)
-
-with col1:
-    monster_list = df1['Monster'].tolist()
-    selected_monster = st.selectbox(
-        "Pilih monster lawan:",
-        options=monster_list
-    )
-
-with col2:
-    rarity_options = sorted(df2['Rarity'].unique())
-    selected_rarity = st.selectbox(
-        "Rarity senjata tertinggi yang bisa Anda buat:",
-        options=rarity_options,
-        index=len(rarity_options)-1 # Default ke rarity tertinggi
-    )
+monster_list = df1['Monster'].tolist()
+selected_monster = st.selectbox(
+    "Pilih monster lawan:",
+    options=monster_list
+)
 
 if st.button("Dapatkan Rekomendasi Senjata"):
     if selected_monster:
         with st.spinner('Menganalisis senjata...'):
-            recommendations = recommend_weapons(selected_monster, df2, df1, max_rarity=selected_rarity)
+            recommendations = recommend_weapons(selected_monster, df2, df1)
 
         st.subheader(f"Rekomendasi Senjata untuk Melawan {selected_monster}:")
         
@@ -98,14 +107,8 @@ if st.button("Dapatkan Rekomendasi Senjata"):
             weapon = item['senjata']
             skor = item['skor']
 
-            # Cek evolusi
-            is_evolution = pd.notna(weapon['Prasyarat Evolusi'])
-            prasyarat_text = f"Evolusi dari: **{weapon['Prasyarat Evolusi']}**" if is_evolution else "Senjata dasar"
-
             with st.expander(f"{i+1}. {weapon['Nama Senjata']}"):
                 st.write(f"**Tipe Senjata:** {weapon['Tipe Senjata']}")
-                st.write(f"**Tingkat Kelangkaan (Rarity):** {weapon['Rarity']}")
-                st.write(f"**Rekomendasi ini adalah:** {prasyarat_text}")
                 st.write(f"**Skor:** {skor:.0f}")
 
                 # Detail statistik untuk transparansi
