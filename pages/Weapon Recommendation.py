@@ -24,38 +24,43 @@ def find_weakness(monster_name, df1):
     return weak_elements, opponent_stats
 
 def recommend_weapons(monster_name, df2, df1):
+    """
+    Merekomendasikan senjata terbaik untuk melawan monster tertentu dari DataFrame.
+    """
+    # Menggunakan fungsi helper untuk menemukan kelemahan dan data monster
     kelemahan_elemen, opponent_stats = find_weakness(monster_name, df1)
     
-    # Gunakan DataFrame penuh tanpa filter rarity
-    filtered_df2 = df2.copy()
-
-    # Perbaikan: Konversi Tipe Data Numerik pada DataFrame yang sudah difilter
-    for col in ['Attack Max', 'Critical', 'Nilai Elemen']:
-        filtered_df2[col] = pd.to_numeric(filtered_df2[col], errors='coerce').fillna(0).astype(int)
+    if opponent_stats is None:
+        return "Monster tidak ditemukan."
 
     # Definisikan bobot untuk setiap kriteria
     BOBOT_SKILL_SPESIFIK = 100
     BOBOT_ELEMEN_KELEMAHAN = 50
     BOBOT_ATTACK = 1
     BOBOT_NILAI_ELEMEN = 5
-    
+
     rekomendasi_senjata = []
     
-    for index, weapon in filtered_df2.iterrows():
+    # Iterasi melalui setiap baris DataFrame senjata
+    for index, weapon in df2.iterrows():
         skor = 0
         
+        # Kriteria 1: Skill Spesifik
         tipe_monster_str = opponent_stats['Type Monster'].replace(' ', '_').lower() + '_slayer'
         if pd.notna(weapon.get('Skill')) and tipe_monster_str in weapon['Skill'].lower():
             skor += BOBOT_SKILL_SPESIFIK
 
+        # Kriteria 2: Elemen Kelemahan
         if pd.notna(weapon.get('Elemen')) and weapon['Elemen'].capitalize() in kelemahan_elemen:
             skor += BOBOT_ELEMEN_KELEMAHAN
             skor += weapon.get('Nilai Elemen', 0) * BOBOT_NILAI_ELEMEN
 
+        # Kriteria 3: Statistik Dasar
         skor += weapon.get('Attack Max', 0) * BOBOT_ATTACK
-        
+
         rekomendasi_senjata.append({'senjata': weapon.to_dict(), 'skor': skor})
 
+    # Urutkan senjata berdasarkan skor
     rekomendasi_senjata_sorted = sorted(rekomendasi_senjata, key=lambda x: x['skor'], reverse=True)
     return rekomendasi_senjata_sorted[:10]
 
