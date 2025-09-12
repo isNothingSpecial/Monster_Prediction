@@ -6,7 +6,6 @@ df= pd.read_csv('MHST_monsties.csv')
 df1 = df.drop(columns=['No'])
 df2 = pd.read_csv('Weapon Monster Hunter Stories.csv')
 
-# --- FUNGSI REKOMENDASI SENJATA ---
 def find_weakness(monster_name, df1):
     """
     Mengidentifikasi kelemahan elemen monster berdasarkan resistansi terendah dari DataFrame.
@@ -14,38 +13,23 @@ def find_weakness(monster_name, df1):
     opponent_stats = df1[df1['Monster'] == monster_name]
     
     if opponent_stats.empty:
+        # Jika monster tidak ditemukan, kembalikan None dan string error
         return None, "Monster tidak ditemukan."
 
-    # Menggunakan .iloc[0] untuk mengakses baris tunggal sebagai Series
-    opponent_stats = opponent_stats.iloc[0]
-
-    resistance_values = {
-        'Fire': opponent_stats['Res_Fire'],
-        'Water': opponent_stats['Res_Water'],
-        'Thunder': opponent_stats['Res_Thunder'],
-        'Ice': opponent_stats['Res_Ice'],
-        'Dragon': opponent_stats['Res_Dragon']
-    }
-    
-    # Menemukan nilai resistansi terendah
-    min_res_value = min(resistance_values.values())
-    
-    # Mengidentifikasi elemen-elemen dengan resistansi terendah
-    kelemahan_elemen = [
-        element for element, value in resistance_values.items() if value == min_res_value
-    ]
-    
-    return kelemahan_elemen, opponent_stats
+    # Jika monster ditemukan, kembalikan Series
+    return opponent_stats.iloc[0], None
 
 def recommend_weapons(monster_name, df2, df1):
     """
     Merekomendasikan senjata terbaik untuk melawan monster tertentu dari DataFrame.
     """
-    # Menggunakan fungsi helper untuk menemukan kelemahan dan data monster
-    kelemahan_elemen, opponent_stats = find_weakness(monster_name, df1)
+    # Gunakan fungsi helper untuk menemukan kelemahan dan data monster
+    # Menangkap kedua nilai kembalian
+    opponent_stats, error_message = find_weakness(monster_name, df1)
     
+    # PERBAIKAN: Tambahkan pemeriksaan ini di sini
     if opponent_stats is None:
-        return "Monster tidak ditemukan."
+        return error_message  # Mengembalikan pesan error jika monster tidak ditemukan
 
     # Perbaikan: Konversi Tipe Data Numerik pada DataFrame
     for col in ['Attack Max', 'Critical', 'Nilai Elemen']:
@@ -99,21 +83,26 @@ selected_monster = st.selectbox(
 if st.button("Dapatkan Rekomendasi Senjata"):
     if selected_monster:
         with st.spinner('Menganalisis senjata...'):
+            # Memanggil fungsi dengan nama variabel yang benar
             recommendations = recommend_weapons(selected_monster, df2, df1)
 
         st.subheader(f"Rekomendasi Senjata untuk Melawan {selected_monster}:")
         
-        for i, item in enumerate(recommendations):
-            weapon = item['senjata']
-            skor = item['skor']
+        # Menangani output jika berupa string error
+        if isinstance(recommendations, str):
+            st.error(recommendations)
+        else:
+            for i, item in enumerate(recommendations):
+                weapon = item['senjata']
+                skor = item['skor']
 
-            with st.expander(f"{i+1}. {weapon['Nama Senjata']}"):
-                st.write(f"**Tipe Senjata:** {weapon['Tipe Senjata']}")
-                st.write(f"**Skor:** {skor:.0f}")
+                with st.expander(f"{i+1}. {weapon['Nama Senjata']}"):
+                    st.write(f"**Tipe Senjata:** {weapon['Tipe Senjata']}")
+                    st.write(f"**Skor:** {skor:.0f}")
 
-                # Detail statistik untuk transparansi
-                st.markdown("---")
-                st.write(f"**Attack Max:** {weapon['Attack Max']}")
-                st.write(f"**Elemen:** {weapon['Elemen']} (Nilai: {weapon['Nilai Elemen']})")
-                st.write(f"**Critical:** {weapon['Critical']}%")
-                st.write(f"**Skill:** {weapon['Skill']}")
+                    # Detail statistik untuk transparansi
+                    st.markdown("---")
+                    st.write(f"**Attack Max:** {weapon['Attack Max']}")
+                    st.write(f"**Elemen:** {weapon['Elemen']} (Nilai: {weapon['Nilai Elemen']})")
+                    st.write(f"**Critical:** {weapon['Critical']}%")
+                    st.write(f"**Skill:** {weapon['Skill']}")
