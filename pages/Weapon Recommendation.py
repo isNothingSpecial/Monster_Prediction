@@ -91,7 +91,6 @@ mode_selection = st.radio(
     "Pilih mode rekomendasi:",
     ('Rekomendasi Senjata untuk Monster', 'Rekomendasi Monster untuk Senjata')
 )
-
     if st.button("Dapatkan Rekomendasi Senjata"):
         if selected_monster:
             with st.spinner('Menganalisis senjata...'):
