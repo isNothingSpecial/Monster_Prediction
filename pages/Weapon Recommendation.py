@@ -40,11 +40,14 @@ def recommend_weapons(monster_name, df_weapon, df_monster):
     """
     Merekomendasikan senjata terbaik untuk melawan monster tertentu dari DataFrame.
     """
-    # Menggunakan fungsi helper untuk menemukan kelemahan dan data monster
     kelemahan_elemen, opponent_stats = find_weakness(monster_name, df_monster)
     
     if opponent_stats is None:
         return "Monster tidak ditemukan."
+
+    # Perbaikan: Konversi Tipe Data Numerik pada DataFrame
+    for col in ['Attack Max', 'Critical', 'Nilai Elemen']:
+        df_weapon[col] = pd.to_numeric(df_weapon[col], errors='coerce').fillna(0).astype(int)
 
     # Definisikan bobot untuk setiap kriteria
     BOBOT_SKILL_SPESIFIK = 100
@@ -94,21 +97,26 @@ selected_monster = st.selectbox(
 if st.button("Dapatkan Rekomendasi Senjata"):
     if selected_monster:
         with st.spinner('Menganalisis senjata...'):
-            # Memanggil fungsi dengan nama variabel yang benar
             recommendations = recommend_weapons(selected_monster, df_weapon, df_monster)
 
         st.subheader(f"Rekomendasi Senjata untuk Melawan {selected_monster}:")
-        for i, item in enumerate(recommendations):
-            weapon = item['senjata']
-            skor = item['skor']
-            
-        with st.expander(f"{i+1}. {weapon['Nama Senjata']}"):
-             st.write(f"**Tipe Senjata:** {weapon['Tipe Senjata']}")
-             st.write(f"**Skor:** {skor:.0f}")
+        
+        # Bagian ini yang diubah
+        # Sekarang, semua perintah tampilan berada di dalam perulangan
+        if isinstance(recommendations, str):
+            st.error(recommendations)
+        else:
+            for i, item in enumerate(recommendations):
+                weapon = item['senjata']
+                skor = item['skor']
 
-             # Detail statistik untuk transparansi
-        st.markdown("---")
-        st.write(f"**Attack Max:** {weapon['Attack Max']}")
-        st.write(f"**Elemen:** {weapon['Elemen']} (Nilai: {weapon['Nilai Elemen']})")
-        st.write(f"**Critical:** {weapon['Critical']}%")
-        st.write(f"**Skill:** {weapon['Skill']}")
+                with st.expander(f"{i+1}. {weapon['Nama Senjata']}"):
+                    st.write(f"**Tipe Senjata:** {weapon['Tipe Senjata']}")
+                    st.write(f"**Skor:** {skor:.0f}")
+
+                    # Detail statistik untuk transparansi
+                    st.markdown("---")
+                    st.write(f"**Attack Max:** {weapon['Attack Max']}")
+                    st.write(f"**Elemen:** {weapon['Elemen']} (Nilai: {weapon['Nilai Elemen']})")
+                    st.write(f"**Critical:** {weapon['Critical']}")
+                    st.write(f"**Skill:** {weapon['Skill']}")
