@@ -41,6 +41,9 @@ highest_resistance_element = monster_data[stats_resist].idxmax().replace('Res_',
 strongest_attack_value = monster_data[f"Att_{strongest_attack_element}"]
 highest_resistance_value = monster_data[f"Res_{highest_resistance_element}"]
 
+# --- ELEMEN TERLEMAH ---
+weakest_resistance_element = monster_data[stats_resist].idxmin().replace('Res_', '')
+weakest_resistance_value = monster_data[f"Res_{weakest_resistance_element}"]
 # --- Halaman Utama ---
 st.markdown(
     """
