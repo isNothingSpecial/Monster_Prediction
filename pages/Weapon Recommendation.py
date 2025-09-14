@@ -118,5 +118,5 @@ if st.button("Dapatkan Rekomendasi Senjata"):
                     st.markdown("---")
                     st.write(f"**Attack Max:** {weapon['Attack Max']}")
                     st.write(f"**Elemen:** {weapon['Elemen']} (Nilai: {weapon['Nilai Elemen']})")
-                    st.write(f"**Critical:** {weapon['Critical']}")
+                    st.write(f"**Critical:** {weapon['Critical']}%")
                     st.write(f"**Skill:** {weapon['Skill']}")
