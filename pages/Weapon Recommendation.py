@@ -1,10 +1,18 @@
 import streamlit as st
 import pandas as pd
+import os
 
-# --- DEKLARASI DATASET CONTOH ---
-df= pd.read_csv('MHST_monsties.csv')
-df_monster = df.drop(columns=['No'])
-df_weapon = pd.read_csv('Weapon Monster Hunter Stories.csv')
+# --- DEKLARASI DATASET LENGKAP ---
+try:
+    df_monster = pd.read_csv('MHST_monsties.csv')
+    df_weapon = pd.read_csv('Weapon Monster Hunter Stories.csv')
+    # Membersihkan kolom 'No' jika ada
+    if 'No' in df_monster.columns:
+        df_monster = df_monster.drop(columns=['No'])
+except FileNotFoundError:
+    st.error("File CSV tidak ditemukan. Pastikan 'MHST_monsties.csv' dan 'Weapon Monster Hunter Stories.csv' ada di direktori yang sama.")
+    st.stop()
+
 
 def find_weakness(monster_name, df_monster):
     """
@@ -14,7 +22,6 @@ def find_weakness(monster_name, df_monster):
     
     if opponent_stats.empty:
         return None, "Monster tidak ditemukan."
-
     opponent_stats = opponent_stats.iloc[0]
 
     resistance_values = {
@@ -34,63 +41,100 @@ def find_weakness(monster_name, df_monster):
     return kelemahan_elemen, opponent_stats
 
 def recommend_weapons(monster_name, df_weapon, df_monster):
-    # Mengambil data monster yang dipilih
+    """
+    Merekomendasikan senjata terbaik untuk melawan monster tertentu.
+    """
     kelemahan_elemen, opponent_stats = find_weakness(monster_name, df_monster)
+    if opponent_stats is None:
+        return "Monster tidak ditemukan."
+    
+    # Konversi kolom ke numerik
+    for col in ['Attack Max', 'Critical', 'Nilai Elemen']:
+        df_weapon[col] = pd.to_numeric(df_weapon[col], errors='coerce').fillna(0).astype(int)
+
+    BOBOT_SKILL_SPESIFIK = 100
+    BOBOT_ELEMEN_KELEMAHAN = 50
+    BOBOT_ATTACK = 1
+    BOBOT_NILAI_ELEMEN = 5
+    BOBOT_CRITICAL = 3
+
     rekomendasi_senjata = []
     
-    # Loop melalui setiap SENJATA
-    for index, weapon in df_weapon.iterrows():
-        skor = 0
-        # Menambahkan skor berdasarkan KECOCOKAN SENJATA dengan kelemahan monster
-        # ... (Logika scoring)
-        rekomendasi_senjata.append({'senjata': weapon.to_dict(), 'skor': skor})
-    
-    return sorted(rekomendasi_senjata, key=lambda x: x['skor'], reverse=True)[:10]
-
-# Fungsi baru (rekomendasi monster untuk senjata)
-def recommend_monsters(weapon_name, df_weapon, df_monster):
-    # Mengambil data senjata yang dipilih
-    weapon_stats = df_weapon[df_weapon['Nama Senjata'] == weapon_name].iloc[0]
-    rekomendasi_monster = []
-    
-    # Loop melalui setiap MONSTER
-    for index, monster in df_monster.iterrows():
+    for _, weapon in df_weapon.iterrows():
         skor = 0
         
-        # Kriteria 1: Kecocokan Skill Senjata dengan Tipe Monster
-        tipe_monster_str = monster['Type Monster'].replace(' ', '_').lower() + '_slayer'
-        if pd.notna(weapon_stats.get('Skill')) and tipe_monster_str in weapon_stats['Skill'].lower():
-            skor += 100 # Bobot bonus untuk slayer skill
+        tipe_monster_str = opponent_stats['Type Monster'].replace(' ', '_').lower() + '_slayer'
+        if pd.notna(weapon.get('Skill')) and tipe_monster_str in weapon['Skill'].lower():
+            skor += BOBOT_SKILL_SPESIFIK
 
-        # Kriteria 2: Kecocokan Elemen Senjata dengan Kelemahan Monster
+        if pd.notna(weapon.get('Elemen')) and weapon['Elemen'].capitalize() in kelemahan_elemen:
+            skor += BOBOT_ELEMEN_KELEMAHAN
+            skor += weapon.get('Nilai Elemen', 0) * BOBOT_NILAI_ELEMEN
+            
+        skor += weapon.get('Attack Max', 0) * BOBOT_ATTACK
+        skor += weapon.get('Critical', 0) * BOBOT_CRITICAL
+
+        rekomendasi_senjata.append({'senjata': weapon.to_dict(), 'skor': skor})
+
+    rekomendasi_senjata_sorted = sorted(rekomendasi_senjata, key=lambda x: x['skor'], reverse=True)
+    return rekomendasi_senjata_sorted[:10]
+
+def recommend_monsters(weapon_name, df_weapon, df_monster):
+    """
+    Merekomendasikan monster yang paling rentan terhadap senjata tertentu.
+    """
+    weapon_stats = df_weapon[df_weapon['Nama Senjata'] == weapon_name]
+    if weapon_stats.empty:
+        return "Senjata tidak ditemukan."
+    weapon_stats = weapon_stats.iloc[0]
+    
+    rekomendasi_monster = []
+    BOBOT_SKILL_SPESIFIK = 100
+    BOBOT_ELEMEN_KELEMAHAN = 20
+    BOBOT_ATTACK_MAX = 1
+    BOBOT_NILAI_ELEMEN = 5
+    BOBOT_CRITICAL = 3
+    
+    for _, monster in df_monster.iterrows():
+        skor = 0
+        
+        weapon_skill = weapon_stats.get('Skill', '').lower()
+        tipe_monster_str = monster['Type Monster'].replace(' ', '_').lower()
+        if tipe_monster_str in weapon_skill:
+            skor += BOBOT_SKILL_SPESIFIK
+        
         weapon_element = weapon_stats.get('Elemen')
         if pd.notna(weapon_element):
-            # Cek resistansi monster terhadap elemen senjata
-            resistance_col = f"Res_{weapon_element.capitalize()}"
-            if resistance_col in monster:
-                # Semakin rendah resistansi monster, semakin tinggi skornya
-                skor += (5 - monster[resistance_col]) * 20 
-
-        # Kriteria 3: Statistik Attack Senjata
-        # Skor monster dipengaruhi oleh seberapa kuat serangan senjata
-        skor += weapon_stats.get('Attack Max', 0) * 1
-
+            res_col = f"Res_{weapon_element.capitalize()}"
+            if res_col in monster:
+                skor += (5 - monster[res_col]) * BOBOT_ELEMEN_KELEMAHAN
+                skor += weapon_stats.get('Nilai Elemen', 0) * BOBOT_NILAI_ELEMEN
+        
+        skor += weapon_stats.get('Attack Max', 0) * BOBOT_ATTACK_MAX
+        skor += weapon_stats.get('Critical', 0) * BOBOT_CRITICAL
+        
         rekomendasi_monster.append({'monster': monster.to_dict(), 'skor': skor})
-    
-    return sorted(rekomendasi_monster, key=lambda x: x['skor'], reverse=True)[:10]
+
+    rekomendasi_monster_sorted = sorted(rekomendasi_monster, key=lambda x: x['skor'], reverse=True)
+    return rekomendasi_monster_sorted[:10]
+
 
 # --- UI APLIKASI STREAMLIT ---
-st.title("Sistem Rekomendasi Senjata MH Stories 1")
-st.markdown("""
-Aplikasi ini membantu Anda menemukan senjata terbaik untuk melawan monster target.
-Pilih monster yang ingin Anda lawan dari daftar di bawah ini.
-""")
+st.title("Sistem Rekomendasi Senjata & Monster")
+st.markdown("---")
 
-# Opsi pilihan mode
 mode_selection = st.radio(
     "Pilih mode rekomendasi:",
     ('Rekomendasi Senjata untuk Monster', 'Rekomendasi Monster untuk Senjata')
 )
+
+if mode_selection == 'Rekomendasi Senjata untuk Monster':
+    st.header("Rekomendasi Senjata untuk Mengalahkan Monster Tertentu")
+    monster_list = df_monster['Monster'].tolist()
+    selected_monster = st.selectbox(
+        "Pilih monster lawan:",
+        options=monster_list
+    )
     if st.button("Dapatkan Rekomendasi Senjata"):
         if selected_monster:
             with st.spinner('Menganalisis senjata...'):
