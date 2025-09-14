@@ -36,14 +36,20 @@ tendency = tendency_map.get(monster_data['Tendency'], "Tidak diketahui")
 stats_attack = ["Att_Fire", "Att_Water", "Att_Thunder", "Att_Ice", "Att_Dragon"]
 stats_resist = ["Res_Fire", "Res_Water", "Res_Thunder", "Res_Ice", "Res_Dragon"]
 
-strongest_attack_element = monster_data[stats_attack].idxmax().replace('Att_', '')
-highest_resistance_element = monster_data[stats_resist].idxmax().replace('Res_', '')
-strongest_attack_value = monster_data[f"Att_{strongest_attack_element}"]
-highest_resistance_value = monster_data[f"Res_{highest_resistance_element}"]
+strongest_attack_value = monster_data[stats_attack].max()
+strongest_attack_elements = [
+    el.replace('Att_', '') for el, val in monster_data[stats_attack].items() if val == strongest_attack_value
+]
 
-# --- ELEMEN TERLEMAH ---
-weakest_resistance_element = monster_data[stats_resist].idxmin().replace('Res_', '')
-weakest_resistance_value = monster_data[f"Res_{weakest_resistance_element}"]
+highest_resistance_value = monster_data[stats_resist].max()
+highest_resistance_elements = [
+    el.replace('Res_', '') for el, val in monster_data[stats_resist].items() if val == highest_resistance_value
+]
+
+weakest_resistance_value = monster_data[stats_resist].min()
+weakest_resistance_elements = [
+    el.replace('Res_', '') for el, val in monster_data[stats_resist].items() if val == weakest_resistance_value
+]
 # --- Halaman Utama ---
 st.markdown(
     """
@@ -75,9 +81,9 @@ if literatur == 'Monster Description':
         st.subheader("Deskripsi")
         st.write(f"**Nama**: {monster_desc}")
         st.write(f"**Tendency**: {tendency}")
-        st.write(f"**Elemen Terkuat**: {strongest_attack_element} ({strongest_attack_value})")
-        st.write(f"**Resistance Tertinggi**: {highest_resistance_element} ({highest_resistance_value})")
-        st.write(f"**Resistance Terendah**: {weakest_resistance_element} ({weakest_resistance_value})")
+        st.write(f"**Elemen Terkuat**: {', '.join(strongest_attack_elements)} ({strongest_attack_value})")
+        st.write(f"**Resistance Tertinggi**: {', '.join(highest_resistance_elements)} ({highest_resistance_value})")
+        st.write(f"**Elemen Terlemah**: {', '.join(weakest_resistance_elements)} ({weakest_resistance_value})")
 
     st.subheader("Statistik Dasar")
     col3, col4 = st.columns(2)
