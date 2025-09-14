@@ -77,6 +77,7 @@ if literatur == 'Monster Description':
         st.write(f"**Tendency**: {tendency}")
         st.write(f"**Elemen Terkuat**: {strongest_attack_element} ({strongest_attack_value})")
         st.write(f"**Resistance Tertinggi**: {highest_resistance_element} ({highest_resistance_value})")
+        st.write(f"**Resistance Terendah**: {weakest_resistance_element} ({weakest_resistance_value})")
 
     st.subheader("Statistik Dasar")
     col3, col4 = st.columns(2)
