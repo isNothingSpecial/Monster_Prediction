@@ -18,7 +18,7 @@ def load_data():
             
         # Pre-processing Data Senjata
         # Bersihkan simbol persentase (%) dari kolom Critical agar bisa dikalkulasi
-        df_w['Critical'] = df_w['Critical'].astype(str).str.replace('%', '').replace('nan', '0').astype(float)
+        df_w['Critical'] = df_w['Critical'].astype(str).str.replace('%', '', regex=False).str.replace('nan', '0', regex=False).astype(float)
         
         # Konversi kolom ke numerik untuk perhitungan matematika
         for col in ['Attack Max', 'Attack Dasar', 'Nilai Elemen']:
@@ -56,7 +56,7 @@ def get_monster_stats(monster_name, df_m):
     strong_elements = [k for k, v in res.items() if v == strongest_val]
     return stats, res, weak_elements, strong_elements
 
-# --- LOGIKA 1: REKOMENDASI SENJATA (BARU) ---
+# --- LOGIKA 1: REKOMENDASI SENJATA UNTUK MONSTER ---
 def recommend_weapons(monster_name, df_w, df_m):
     stats, res_dict, weak_elements, strong_elements = get_monster_stats(monster_name, df_m)
     recom_list = []
@@ -75,58 +75,91 @@ def recommend_weapons(monster_name, df_w, df_m):
         if elemen != 'Raw' and pd.notna(elemen):
             mon_res = res_dict.get(elemen, 3) 
             
-            # Jika elemen senjata cocok dengan kelemahan target = Bonus Besar
+            # Jika elemen senjata cocok dengan kelemahan target
             if elemen in weak_elements:
                 el_score += 50 + (nilai_el * 3)
-            # Jika elemen senjata menabrak pertahanan terkuat target = Penalti / Resisted
+            # Jika elemen senjata menabrak pertahanan terkuat target (Resisted)
             elif elemen in strong_elements:
                 el_score -= 50
             else:
-                # Elemen Netral: Dihitung berdasar nilai resistansi
+                # Elemen Netral
                 el_score += (3 - mon_res) * 5
 
         # 3. Utilitas Efek Status
         status_score = 0
         if pd.notna(w['Bonus Status Effect']) and str(w['Bonus Status Effect']).lower() not in ['none', 'nan', '']:
-            status_score = 15 # Senjata status (Poison, Para, dll) selalu punya nilai taktis
+            status_score = 15 
             
         final_score = base_score + el_score + status_score
-        
         recom_list.append({'Weapon': w, 'Score': final_score})
         
     sorted_recom = sorted(recom_list, key=lambda x: x['Score'], reverse=True)
-    return sorted_recom[:6] # Ambil Top 6 agar tampilannya pas di grid
+    return sorted_recom[:6]
 
-# --- LOGIKA 2: REKOMENDASI MONSTER UNTUK SENJATA (BARU) ---
+# --- LOGIKA 2: REKOMENDASI MONSTER UNTUK SENJATA (ANTI-OVERKILL) ---
 def recommend_monsters_for_weapon(weapon_name, df_w, df_m):
     w_stats = df_w[df_w['Nama Senjata'] == weapon_name].iloc[0]
     elemen = w_stats['Elemen']
+    att_max = w_stats['Attack Max']
+    
+    # 1. Menentukan Weapon Tier / Power Level (Asumsi max attack di game ~120)
+    w_power_level = min((att_max / 120.0) * 10, 10.0)
     
     recom_list = []
     
     for _, m in df_m.iterrows():
-        score = 0
-        def_penalty = m['Defence'] * 5 # Semakin tebal defence, semakin alot dilawan
+        # 2. Menentukan Monster Threat Level (Asumsi max HP 5 + max Def 5 = 10)
+        m_threat_level = m['HP'] + m['Defence']
         
-        # Jika senjata punya elemen, incar monster yang tidak punya resistansi elemen itu
+        # 3. Menghitung Selisih Kekuatan (Power Gap)
+        power_diff = w_power_level - m_threat_level
+        
+        # 4. Kalkulasi Elemental Advantage
+        el_advantage = 0
         if elemen != 'Raw' and pd.notna(elemen):
             res_val = m.get(f'Res_{elemen}', 3)
-            # res_val 1 (sangat lemah) -> skor tinggi, res_val 5 (kebal) -> skor hancur
-            el_advantage = (5 - res_val) * 30
-            score = el_advantage - def_penalty
-        else:
-            # Jika senjatanya RAW, sistem cuma mencari target ber-defence ampas
-            score = 100 - def_penalty
+            el_advantage = (5 - res_val) * 25 
             
-        recom_list.append({'Monster': m, 'Score': score})
+        # 5. Penilaian Kecocokan (Level Matching)
+        match_score = 50 - (abs(power_diff) * 8)
+        
+        # 6. PENALTI OVERKILL / QUICK FINISH
+        if power_diff > 4: 
+            match_score -= 100 
+            kategori_match = "Overkill (Quick Finish)"
+        elif power_diff < -4:
+            match_score -= 50
+            kategori_match = "Sangat Sulit (Undergeared)"
+        elif power_diff > 1.5:
+            kategori_match = "Mudah"
+        elif power_diff < -1.5:
+            kategori_match = "Menantang"
+        else:
+            kategori_match = "Sempurna (Balanced)"
+            
+        # 7. Total Skor
+        if elemen == 'Raw':
+            score = match_score + ((5 - m['Defence']) * 10)
+        else:
+            score = el_advantage + match_score
+            
+        # Filter skor: Hindari memasukkan monster overkill ke rekomendasi teratas
+        if score > 0:
+            recom_list.append({
+                'Monster': m, 
+                'Score': score, 
+                'Threat': m_threat_level,
+                'Kategori': kategori_match,
+                'PowerDiff': power_diff
+            })
         
     sorted_recom = sorted(recom_list, key=lambda x: x['Score'], reverse=True)
-    return sorted_recom[:6], w_stats
+    return sorted_recom[:6], w_stats, w_power_level
 
 
 # --- UI APLIKASI STREAMLIT ---
 st.markdown("<h1 style='text-align: center;'>⚔️ Armory & Weapon Recommender</h1>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center; color: gray;'>Temukan senjata paling mematikan untuk membunuh target, atau cari target paling empuk untuk senjata Anda.</p>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: gray;'>Temukan senjata paling mematikan untuk membunuh target, atau cari target paling worthy untuk diuji dengan senjata Anda.</p>", unsafe_allow_html=True)
 st.divider()
 
 # Menggunakan Tabs untuk navigasi mode
@@ -158,7 +191,7 @@ with tab1:
                 tipe_icon = tipe_senjata_emojis.get(w['Tipe Senjata'], w['Tipe Senjata'])
                 el_icon = elemen_emojis.get(w['Elemen'], '')
                 
-                with cols[i % 2]: # Membagi ke kiri dan kanan bergantian
+                with cols[i % 2]:
                     with st.container(border=True):
                         st.markdown(f"#### #{i+1} {w['Nama Senjata']}")
                         st.caption(f"{tipe_icon}")
@@ -180,45 +213,55 @@ with tab2:
     with w_col_sel:
         weapon_list = sorted(df_weapon['Nama Senjata'].tolist())
         selected_weapon = st.selectbox("Pilih Senjata di Inventory Anda:", options=weapon_list, key="sel_weap")
-        btn_find_m = st.button("Cari Target Empuk", type="primary", use_container_width=True)
+        btn_find_m = st.button("Cari Target Terbaik", type="primary", use_container_width=True)
         
     with w_col_info:
         if selected_weapon:
             w_info = df_weapon[df_weapon['Nama Senjata'] == selected_weapon].iloc[0]
             el_str = f"{elemen_emojis.get(w_info['Elemen'], '')} {w_info['Elemen']}"
-            st.success(f"**{w_info['Nama Senjata']}** adalah senjata bertipe **{w_info['Tipe Senjata']}** dengan daya hancur ber-elemen **{el_str}**.")
+            w_power = min((w_info['Attack Max'] / 120.0) * 10, 10.0)
+            
+            st.success(f"**{w_info['Nama Senjata']}** ({w_info['Tipe Senjata']}) - Elemen: **{el_str}**")
+            st.info(f"⚔️ **Weapon Power Tier: {w_power:.1f} / 10.0** (Berdasarkan Attack Max {w_info['Attack Max']})")
 
     if btn_find_m:
-        with st.spinner('Memindai habitat monster...'):
-            recommendations, w_stats = recommend_monsters_for_weapon(selected_weapon, df_weapon, df_monster)
+        with st.spinner('Menganalisis kecocokan Threat Level...'):
+            recommendations, w_stats, w_power_level = recommend_monsters_for_weapon(selected_weapon, df_weapon, df_monster)
             elemen_weap = w_stats['Elemen']
             
-            st.markdown(f"### 🎯 Top 6 Monster Rentan Terhadap {selected_weapon}")
-            if elemen_weap == 'Raw':
-                st.caption("Karena senjata ini tipe Raw (Fisik murni), sistem merekomendasikan target dengan stat *Defence* keseluruhan paling lemah.")
-            else:
-                st.caption(f"Sistem mengincar target yang memiliki pertahanan sangat buruk terhadap elemen **{elemen_weap}**.")
+            st.markdown(f"### 🎯 Top 6 Target Paling Layak (Worthy) untuk {selected_weapon}")
+            st.caption("Sistem kini menghindari target 'Overkill' yang bisa diselesaikan dengan *Quick Finish*, dan mencari target *High-Value* dengan kelemahan elemen yang tepat.")
             
             # Tampilan Card Grid (2 Kolom)
             cols2 = st.columns(2)
             for i, item in enumerate(recommendations):
                 m = item['Monster']
+                kat = item['Kategori']
+                threat = item['Threat']
                 
                 with cols2[i % 2]:
                     with st.container(border=True):
                         st.markdown(f"#### #{i+1} {m['Monster']}")
                         
+                        # Labeling Kategori Kesulitan
+                        if "Sempurna" in kat:
+                            st.success(f"Tingkat Kesulitan: **{kat}**")
+                        elif "Mudah" in kat:
+                            st.info(f"Tingkat Kesulitan: **{kat}**")
+                        elif "Menantang" in kat:
+                            st.warning(f"Tingkat Kesulitan: **{kat}**")
+                        else:
+                            st.error(f"Tingkat Kesulitan: **{kat}**")
+                            
                         m1, m2 = st.columns(2)
-                        m1.metric("Defence", m['Defence'], delta="-Rendah", delta_color="inverse")
+                        m1.metric("Threat Level", f"{threat}/10", help="Gabungan Base HP + Defence Monster")
                         
                         if elemen_weap != 'Raw':
                             res_val = m.get(f'Res_{elemen_weap}', 3)
-                            # Render teks berdasarkan seberapa lemah
-                            if res_val == 1:
-                                desc = "Sangat Rentan"
-                            elif res_val == 2:
-                                desc = "Rentan"
-                            else:
-                                desc = "Normal"
-                                
-                            m2.metric(f"Resistansi {elemen_weap}", res_val, delta=desc, delta_color="inverse")
+                            if res_val == 1: desc = "Sangat Rentan"
+                            elif res_val == 2: desc = "Rentan"
+                            else: desc = "Biasa"
+                            
+                            m2.metric(f"Res. {elemen_weap}", res_val, delta=desc, delta_color="inverse")
+                        else:
+                            m2.metric("Defence Fisik", m['Defence'])
