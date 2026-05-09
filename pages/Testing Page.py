@@ -270,4 +270,49 @@ with tab2:
             w_power = min((w_info['Attack Max'] / 120.0) * 10, 10.0)
             
             st.success(f"**{w_info['Nama Senjata']}** ({w_info['Tipe Senjata']}) - Elemen: **{el_str}**")
-            st.info(f"⚔️ **Weapon Power Tier: {w_power:.1f} / 10.0** (Berdasarkan Attack
+            st.info(f"⚔️ **Weapon Power Tier: {w_power:.1f} / 10.0** (Berdasarkan Attack Max {w_info['Attack Max']})")
+
+    if btn_find_m:
+        with st.spinner('Menganalisis kecocokan Threat Level...'):
+            recommendations, w_stats, w_power_level = recommend_monsters_for_weapon(selected_weapon, df_weapon, df_monster)
+            elemen_weap = w_stats['Elemen']
+            
+            if not recommendations:
+                st.warning("Tidak ada target monster yang direkomendasikan untuk senjata ini di database.")
+            else:
+                st.markdown(f"### 🎯 Top 6 Target Paling Layak (Worthy) untuk {selected_weapon}")
+                st.caption("Sistem kini menghindari target 'Overkill' yang bisa diselesaikan dengan *Quick Finish*, dan mencari target *High-Value* dengan kelemahan elemen yang tepat.")
+                
+                # Tampilan Card Grid (2 Kolom)
+                cols2 = st.columns(2)
+                for i, item in enumerate(recommendations):
+                    m = item['Monster']
+                    kat = item['Kategori']
+                    threat = item['Threat']
+                    
+                    with cols2[i % 2]:
+                        with st.container(border=True):
+                            st.markdown(f"#### #{i+1} {m['Monster']}")
+                            
+                            # Labeling Kategori Kesulitan
+                            if "Sempurna" in kat:
+                                st.success(f"Tingkat Kesulitan: **{kat}**")
+                            elif "Mudah" in kat:
+                                st.info(f"Tingkat Kesulitan: **{kat}**")
+                            elif "Menantang" in kat:
+                                st.warning(f"Tingkat Kesulitan: **{kat}**")
+                            else:
+                                st.error(f"Tingkat Kesulitan: **{kat}**")
+                                
+                            m1, m2 = st.columns(2)
+                            m1.metric("Threat Level", f"{threat}/10", help="Gabungan Base HP + Defence Monster")
+                            
+                            if elemen_weap != 'Raw':
+                                res_val = m.get(f'Res_{elemen_weap}', 3)
+                                if res_val == 1: desc = "Sangat Rentan"
+                                elif res_val == 2: desc = "Rentan"
+                                else: desc = "Biasa"
+                                
+                                m2.metric(f"Res. {elemen_weap}", res_val, delta=desc, delta_color="inverse")
+                            else:
+                                m2.metric("Defence Fisik", m['Defence'])
