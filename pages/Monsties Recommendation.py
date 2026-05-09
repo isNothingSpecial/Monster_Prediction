@@ -2,111 +2,136 @@ import streamlit as st
 import pandas as pd
 import os
 
-df= pd.read_csv('MHST_monsties.csv')
-df1 = df.drop(columns=['No'])
+# --- KONFIGURASI HALAMAN ---
+st.set_page_config(page_title="MHST Recommender", layout="wide")
 
-# Tambahkan kolom 'Image_Path'
-#df1['Image_Path'] = df1['Monster'].apply(lambda x: f'Monslist/{x}.webp')
+# --- KAMUS EMOJI & TENDENCY ---
+tendency_map = {1: 'Speed', 2: 'Power', 3: 'Technique'}
+tendency_rev_map = {'Speed': 1, 'Power': 2, 'Technique': 3}
 
-# --- FUNGSI REKOMENDASI (SAMA SEPERTI SEBELUMNYA) ---
-def find_weakness(monster_name, df1):
-    opponent_stats = df1[df1['Monster'] == monster_name].iloc[0]
+element_emojis = {
+    'Fire': '🔥', 'Water': '💧', 'Thunder': '⚡', 'Ice': '❄️', 'Dragon': '🐉'
+}
+tendency_emojis = {
+    'Speed': '🏃 (Speed)', 'Power': '🥊 (Power)', 'Technique': '🧠 (Technique)'
+}
 
-    resistance_values = {
-        'Fire': opponent_stats['Res_Fire'],
-        'Water': opponent_stats['Res_Water'],
-        'Thunder': opponent_stats['Res_Thunder'],
-        'Ice': opponent_stats['Res_Ice'],
-        'Dragon': opponent_stats['Res_Dragon']
-    }
-    min_res_value = min(resistance_values.values())
-    weak_elements = [el for el, val in resistance_values.items() if val == min_res_value]
+# --- SIDEBAR: PILIHAN SERIES GAME ---
+st.sidebar.title("🐉 Pilihan Series")
+series_choice = st.sidebar.selectbox(
+    "Pilih Series Game:",
+    ["Monster Hunter Stories 1", "Monster Hunter Stories 2", "Monster Hunter Stories 3"]
+)
 
-    tendency_map = {1: 'Speed', 2: 'Power', 3: 'Technique'}
-    opponent_tendency = tendency_map.get(opponent_stats['Tendency'])
-    
-    if opponent_tendency == 'Speed':
+# Mapping nama series ke nama file CSV
+file_map = {
+    "Monster Hunter Stories 1": "MHST_monsties.csv",
+    "Monster Hunter Stories 2": "MHST2_monsties.csv", # Sesuaikan jika nama file berbeda
+    "Monster Hunter Stories 3": "MHST3_monsties.csv"  # Sesuaikan jika nama file berbeda
+}
+
+file_name = file_map[series_choice]
+
+# --- LOAD DATA ---
+@st.cache_data
+def load_data(file_path):
+    try:
+        df = pd.read_csv(file_path)
+        # Menghapus kolom 'No' jika ada
+        if 'No' in df.columns:
+            df = df.drop(columns=['No'])
+        return df
+    except FileNotFoundError:
+        return None
+
+df1 = load_data(file_name)
+
+# --- FUNGSI ANALISIS LAWAN & REKOMENDASI ---
+def analyze_opponent(monster_name, df):
+    stats = df[df['Monster'] == monster_name].iloc[0]
+
+    # 1. Cari Kelemahan Terbesar (Resistensi Terendah)
+    res_cols = {'Fire': stats['Res_Fire'], 'Water': stats['Res_Water'], 
+                'Thunder': stats['Res_Thunder'], 'Ice': stats['Res_Ice'], 'Dragon': stats['Res_Dragon']}
+    min_res = min(res_cols.values())
+    weak_elements = [el for el, val in res_cols.items() if val == min_res]
+
+    # 2. Cari Serangan Terkuat Lawan (Untuk keperluan pertahanan Monstie kita)
+    att_cols = {'Fire': stats['Att_Fire'], 'Water': stats['Att_Water'], 
+                'Thunder': stats['Att_Thunder'], 'Ice': stats['Att_Ice'], 'Dragon': stats['Att_Dragon']}
+    max_att = max(att_cols.values())
+    strong_elements = [el for el, val in att_cols.items() if val == max_att]
+
+    # 3. Tentukan Counter Tendency
+    opp_tendency = tendency_map.get(stats['Tendency'], 'Unknown')
+    if opp_tendency == 'Speed':
         counter_tendency = 'Technique'
-    elif opponent_tendency == 'Technique':
+    elif opp_tendency == 'Technique':
         counter_tendency = 'Power'
     else:
         counter_tendency = 'Speed'
         
-    return weak_elements, counter_tendency, opponent_stats
+    return stats, weak_elements, strong_elements, opp_tendency, counter_tendency
 
-def recommend_monsties(monster_name, df1):
-    try:
-        weak_elements, counter_tendency, _ = find_weakness(monster_name, df1)
-    except IndexError:
-        return "Monster not found."
-
-    tendency_map = {'Speed': 1, 'Power': 2, 'Technique': 3}
+def recommend_monsties_v2(monster_name, df):
+    stats, weak_elements, strong_elements, opp_tendency, counter_tendency = analyze_opponent(monster_name, df)
     
-    counter_monsties = df1[df1['Tendency'] == tendency_map[counter_tendency]]
+    # Filter Monstie berdasarkan Counter Tendency yang tepat
+    candidates = df[df['Tendency'] == tendency_rev_map[counter_tendency]].copy()
+    
+    # Jangan rekomendasikan monster yang sama dengan lawan
+    candidates = candidates[candidates['Monster'] != monster_name]
+    
+    opp_strongest_element = strong_elements[0] # Ambil salah satu serangan terkuat lawan
     
     recom_list = []
     
     for weak_el in weak_elements:
-        attack_col = f'Att_{weak_el}'
+        att_col = f'Att_{weak_el}'
+        res_col = f'Res_{opp_strongest_element}'
         
-        if attack_col in counter_monsties.columns:
-            sorted_monsties = counter_monsties.sort_values(by=attack_col, ascending=False)
+        if att_col in candidates.columns and res_col in candidates.columns:
+            # Skor kombinasi (Serangan tinggi kelemahan lawan + Pertahanan tinggi dari serangan lawan)
+            candidates['Score'] = (candidates[att_col] * 2) + candidates[res_col]
             
-            for _, monstie in sorted_monsties.head(3).iterrows():
+            top_candidates = candidates.sort_values(by=['Score', att_col], ascending=[False, False]).head(3)
+            
+            for _, row in top_candidates.iterrows():
                 recom_list.append({
-                    'Monster': monstie['Monster'],
+                    'Monster': row['Monster'],
                     'Attack Element': weak_el,
-                    'Attack Value': monstie[attack_col],
-                    'Tendency': counter_tendency
+                    'Attack Value': row[att_col],
+                    'Defense Element': opp_strongest_element,
+                    'Defense Value': row[res_col],
+                    'Tendency': counter_tendency,
+                    'Score': row['Score']
                 })
-    
-    unique_recoms = pd.DataFrame(recom_list).drop_duplicates(subset=['Monster']).to_dict('records')
-    
-    final_recoms = sorted(unique_recoms, key=lambda x: x['Attack Value'], reverse=True)
-    
-    if not final_recoms:
-        return "No suitable monsties found."
-    
-    return final_recoms
+                
+    unique_recoms = pd.DataFrame(recom_list).drop_duplicates(subset=['Monster'])
+    if unique_recoms.empty:
+        return None
+        
+    return unique_recoms.sort_values(by='Score', ascending=False).to_dict('records')
+
 
 # --- UI APLIKASI STREAMLIT ---
-st.title("Monster Hunter Stories: Sistem Rekomendasi Monstie")
+st.markdown(f"<h1 style='text-align: center;'>⚔️ {series_choice}: Recommender</h1>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: gray;'>Sistem cerdas untuk menemukan Monstie pendamping terbaik berdasarkan analisa ofensif dan defensif.</p>", unsafe_allow_html=True)
+st.divider()
 
-st.markdown("""
-Aplikasi ini membantu Anda menemukan monster pendamping (Monstie) terbaik untuk melawan monster target.
-Pilih monster yang ingin Anda lawan dari daftar di bawah ini.
-""")
+# Pengecekan apakah data berhasil di-load
+if df1 is None:
+    st.error(f"Dataset untuk {series_choice} ({file_name}) belum tersedia di direktori.")
+    st.info("Fitur untuk seri ini sedang dalam tahap pengembangan. Silakan pilih 'Monster Hunter Stories 1' di menu samping untuk mencoba.")
+    st.stop() # Menghentikan eksekusi kode di bawahnya agar tidak error
 
-# Mendapatkan daftar nama monster dari DataFrame untuk dropdown
-monster_list = df1['Monster'].tolist()
+# Layout Pemilihan Lawan
+col_select, col_opp_info = st.columns([1, 2])
 
-# Dropdown untuk memilih monster
-selected_monster = st.selectbox(
-    "Pilih monster lawan:",
-    options=monster_list
-)
+with col_select:
+    st.subheader("🎯 Target Lawan")
+    monster_list = sorted(df1['Monster'].tolist())
+    selected_monster = st.selectbox("Pilih monster yang ingin Anda lawan:", options=monster_list)
+    btn_analyze = st.button("Analisis & Cari Counter", use_container_width=True, type="primary")
 
-# Tombol untuk menjalankan rekomendasi
-if st.button("Dapatkan Rekomendasi"):
-    if selected_monster:
-        with st.spinner('Menganalisis kelemahan monster...'):
-            recommendations = recommend_monsties(selected_monster, df1)
-        
-        st.subheader(f"Rekomendasi untuk Melawan {selected_monster}:")
-        
-        if isinstance(recommendations, str):
-            st.error(recommendations)
-        else:
-            #for i, recom in enumerate(recommendations):
-                # Dapatkan path gambar dari DataFrame
-                #recommended_monster_info = df1[df1['Monster'] == recom['Monster']]['Image_Path'].iloc[0]
-                #image_path = recommended_monster_info['Image_Path']
-            # Menggunakan expander untuk tampilan yang lebih rapi
-            for i, recom in enumerate(recommendations):
-                with st.expander(f"{i+1}. {recom['Monster']}"):
-                    #st.image(image_path, width=150)
-                    st.write(f"**Tendensi yang direkomendasikan:** {recom['Tendency']}")
-                    st.write(f"**Elemen serangan terbaik:** {recom['Attack Element']}")
-                    st.write(f"**Nilai serangan:** {recom['Attack Value']}")
-                    st.markdown("---")
-                    st.write("Monster ini memiliki serangan yang kuat dan cocok secara strategi.")
+with col_opp_info:
