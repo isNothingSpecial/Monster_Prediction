@@ -3,175 +3,222 @@ import pandas as pd
 import os
 
 # --- KONFIGURASI HALAMAN ---
-st.set_page_config(page_title="MHST Recommender", layout="wide")
-
-# --- KAMUS EMOJI & TENDENCY ---
-tendency_map = {1: 'Speed', 2: 'Power', 3: 'Technique'}
-tendency_rev_map = {'Speed': 1, 'Power': 2, 'Technique': 3}
-
-element_emojis = {
-    'Fire': '🔥', 'Water': '💧', 'Thunder': '⚡', 'Ice': '❄️', 'Dragon': '🐉'
-}
-tendency_emojis = {
-    'Speed': '🏃 (Speed)', 'Power': '🥊 (Power)', 'Technique': '🧠 (Technique)'
-}
+st.set_page_config(page_title="MHST Armory", layout="wide")
 
 # --- LOAD DATA ---
 @st.cache_data
 def load_data():
     try:
-        df = pd.read_csv('MHST_monsties.csv')
-        # Menghapus kolom 'No' jika ada
-        if 'No' in df.columns:
-            df = df.drop(columns=['No'])
-        return df
+        df_m = pd.read_csv('MHST_monsties.csv')
+        df_w = pd.read_csv('Weapon Monster Hunter Stories.csv')
+        
+        # Membersihkan kolom 'No' jika ada
+        if 'No' in df_m.columns:
+            df_m = df_m.drop(columns=['No'])
+            
+        # Pre-processing Data Senjata
+        # Bersihkan simbol persentase (%) dari kolom Critical agar bisa dikalkulasi
+        df_w['Critical'] = df_w['Critical'].astype(str).str.replace('%', '').replace('nan', '0').astype(float)
+        
+        # Konversi kolom ke numerik untuk perhitungan matematika
+        for col in ['Attack Max', 'Attack Dasar', 'Nilai Elemen']:
+            df_w[col] = pd.to_numeric(df_w[col], errors='coerce').fillna(0).astype(int)
+            
+        return df_m, df_w
     except FileNotFoundError:
-        st.error("File 'MHST_monsties.csv' tidak ditemukan.")
+        st.error("File CSV tidak ditemukan. Pastikan 'MHST_monsties.csv' dan 'Weapon Monster Hunter Stories.csv' ada di direktori yang sama.")
         st.stop()
 
-df1 = load_data()
+df_monster, df_weapon = load_data()
 
-# --- FUNGSI ANALISIS LAWAN & REKOMENDASI (LOGIKA BARU) ---
-def analyze_opponent(monster_name, df):
-    stats = df[df['Monster'] == monster_name].iloc[0]
+# --- KAMUS EMOJI ---
+elemen_emojis = {
+    'Fire': '🔥', 'Water': '💧', 'Thunder': '⚡', 'Ice': '❄️', 'Dragon': '🐉', 'Raw': '⚔️'
+}
+tipe_senjata_emojis = {
+    'Sword And Shield': '🗡️🛡️ SnS',
+    'Great Sword': '🗡️ GS',
+    'Hammer': '🔨 Hammer',
+    'Hunting Horn': '📯 Horn'
+}
 
-    # 1. Cari Kelemahan Terbesar (Resistensi Terendah)
-    res_cols = {'Fire': stats['Res_Fire'], 'Water': stats['Res_Water'], 
-                'Thunder': stats['Res_Thunder'], 'Ice': stats['Res_Ice'], 'Dragon': stats['Res_Dragon']}
-    min_res = min(res_cols.values())
-    weak_elements = [el for el, val in res_cols.items() if val == min_res]
+# --- HELPER: ANALISIS LAWAN ---
+def get_monster_stats(monster_name, df_m):
+    stats = df_m[df_m['Monster'] == monster_name].iloc[0]
+    res = {
+        'Fire': stats['Res_Fire'], 'Water': stats['Res_Water'], 
+        'Thunder': stats['Res_Thunder'], 'Ice': stats['Res_Ice'], 'Dragon': stats['Res_Dragon']
+    }
+    weakest_val = min(res.values())
+    strongest_val = max(res.values())
+    
+    weak_elements = [k for k, v in res.items() if v == weakest_val]
+    strong_elements = [k for k, v in res.items() if v == strongest_val]
+    return stats, res, weak_elements, strong_elements
 
-    # 2. Cari Serangan Terkuat Lawan (Untuk keperluan pertahanan Monstie kita)
-    att_cols = {'Fire': stats['Att_Fire'], 'Water': stats['Att_Water'], 
-                'Thunder': stats['Att_Thunder'], 'Ice': stats['Att_Ice'], 'Dragon': stats['Att_Dragon']}
-    max_att = max(att_cols.values())
-    strong_elements = [el for el, val in att_cols.items() if val == max_att]
-
-    # 3. Tentukan Counter Tendency
-    opp_tendency = tendency_map.get(stats['Tendency'], 'Unknown')
-    if opp_tendency == 'Speed':
-        counter_tendency = 'Technique'
-    elif opp_tendency == 'Technique':
-        counter_tendency = 'Power'
-    else:
-        counter_tendency = 'Speed'
+# --- LOGIKA 1: REKOMENDASI SENJATA (BARU) ---
+def recommend_weapons(monster_name, df_w, df_m):
+    stats, res_dict, weak_elements, strong_elements = get_monster_stats(monster_name, df_m)
+    recom_list = []
+    
+    for _, w in df_w.iterrows():
+        att = w['Attack Max']
+        crit = w['Critical']
+        elemen = w['Elemen']
+        nilai_el = w['Nilai Elemen']
         
-    return stats, weak_elements, strong_elements, opp_tendency, counter_tendency
+        # 1. Damage Fisik (Attack + Ekspektasi Bonus Critical)
+        base_score = att + (att * (crit / 100.0) * 0.5) 
+        
+        # 2. Kalkulasi Keuntungan/Kerugian Elemen
+        el_score = 0
+        if elemen != 'Raw' and pd.notna(elemen):
+            mon_res = res_dict.get(elemen, 3) 
+            
+            # Jika elemen senjata cocok dengan kelemahan target = Bonus Besar
+            if elemen in weak_elements:
+                el_score += 50 + (nilai_el * 3)
+            # Jika elemen senjata menabrak pertahanan terkuat target = Penalti / Resisted
+            elif elemen in strong_elements:
+                el_score -= 50
+            else:
+                # Elemen Netral: Dihitung berdasar nilai resistansi
+                el_score += (3 - mon_res) * 5
 
-def recommend_monsties_v2(monster_name, df):
-    stats, weak_elements, strong_elements, opp_tendency, counter_tendency = analyze_opponent(monster_name, df)
-    
-    # Filter Monstie berdasarkan Counter Tendency yang tepat
-    candidates = df[df['Tendency'] == tendency_rev_map[counter_tendency]].copy()
-    
-    # Jangan rekomendasikan monster yang sama dengan lawan
-    candidates = candidates[candidates['Monster'] != monster_name]
-    
-    opp_strongest_element = strong_elements[0] # Ambil salah satu serangan terkuat lawan
+        # 3. Utilitas Efek Status
+        status_score = 0
+        if pd.notna(w['Bonus Status Effect']) and str(w['Bonus Status Effect']).lower() not in ['none', 'nan', '']:
+            status_score = 15 # Senjata status (Poison, Para, dll) selalu punya nilai taktis
+            
+        final_score = base_score + el_score + status_score
+        
+        recom_list.append({'Weapon': w, 'Score': final_score})
+        
+    sorted_recom = sorted(recom_list, key=lambda x: x['Score'], reverse=True)
+    return sorted_recom[:6] # Ambil Top 6 agar tampilannya pas di grid
+
+# --- LOGIKA 2: REKOMENDASI MONSTER UNTUK SENJATA (BARU) ---
+def recommend_monsters_for_weapon(weapon_name, df_w, df_m):
+    w_stats = df_w[df_w['Nama Senjata'] == weapon_name].iloc[0]
+    elemen = w_stats['Elemen']
     
     recom_list = []
     
-    for weak_el in weak_elements:
-        att_col = f'Att_{weak_el}'
-        res_col = f'Res_{opp_strongest_element}'
+    for _, m in df_m.iterrows():
+        score = 0
+        def_penalty = m['Defence'] * 5 # Semakin tebal defence, semakin alot dilawan
         
-        if att_col in candidates.columns and res_col in candidates.columns:
-            # LOGIKA BARU: Skor kombinasi (Serangan tinggi kelemahan lawan + Pertahanan tinggi dari serangan lawan)
-            # Bobot serangan dikalikan 2 karena offense sedikit lebih penting, ditambah nilai pertahanan
-            candidates['Score'] = (candidates[att_col] * 2) + candidates[res_col]
+        # Jika senjata punya elemen, incar monster yang tidak punya resistansi elemen itu
+        if elemen != 'Raw' and pd.notna(elemen):
+            res_val = m.get(f'Res_{elemen}', 3)
+            # res_val 1 (sangat lemah) -> skor tinggi, res_val 5 (kebal) -> skor hancur
+            el_advantage = (5 - res_val) * 30
+            score = el_advantage - def_penalty
+        else:
+            # Jika senjatanya RAW, sistem cuma mencari target ber-defence ampas
+            score = 100 - def_penalty
             
-            # Urutkan berdasarkan skor tertinggi
-            top_candidates = candidates.sort_values(by=['Score', att_col], ascending=[False, False]).head(3)
-            
-            for _, row in top_candidates.iterrows():
-                recom_list.append({
-                    'Monster': row['Monster'],
-                    'Attack Element': weak_el,
-                    'Attack Value': row[att_col],
-                    'Defense Element': opp_strongest_element,
-                    'Defense Value': row[res_col],
-                    'Tendency': counter_tendency,
-                    'Score': row['Score']
-                })
-                
-    # Hapus duplikat jika monster yang sama direkomendasikan lebih dari sekali
-    unique_recoms = pd.DataFrame(recom_list).drop_duplicates(subset=['Monster'])
-    if unique_recoms.empty:
-        return None
+        recom_list.append({'Monster': m, 'Score': score})
         
-    return unique_recoms.sort_values(by='Score', ascending=False).to_dict('records')
+    sorted_recom = sorted(recom_list, key=lambda x: x['Score'], reverse=True)
+    return sorted_recom[:6], w_stats
+
 
 # --- UI APLIKASI STREAMLIT ---
-st.markdown("<h1 style='text-align: center;'>⚔️ Monster Hunter Stories: Recommender</h1>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center; color: gray;'>Sistem cerdas untuk menemukan Monstie pendamping terbaik berdasarkan analisa ofensif dan defensif.</p>", unsafe_allow_html=True)
+st.markdown("<h1 style='text-align: center;'>⚔️ Armory & Weapon Recommender</h1>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: gray;'>Temukan senjata paling mematikan untuk membunuh target, atau cari target paling empuk untuk senjata Anda.</p>", unsafe_allow_html=True)
 st.divider()
 
-# Layout Pemilihan Lawan
-col_select, col_opp_info = st.columns([1, 2])
+# Menggunakan Tabs untuk navigasi mode
+tab1, tab2 = st.tabs(["🗡️ Cari Senjata Lawan Monster", "🎯 Cari Target Untuk Senjata"])
 
-with col_select:
-    st.subheader("🎯 Target Lawan")
-    monster_list = sorted(df1['Monster'].tolist())
-    selected_monster = st.selectbox("Pilih monster yang ingin Anda lawan:", options=monster_list)
-    btn_analyze = st.button("Analisis & Cari Counter", use_container_width=True, type="primary")
-
-with col_opp_info:
-    if selected_monster:
-        stats, weak_els, strong_els, opp_tendency, _ = analyze_opponent(selected_monster, df1)
-        st.subheader("📊 Profil Target")
+# --- TAB 1: SENJATA UNTUK MONSTER ---
+with tab1:
+    col_sel, col_info = st.columns([1, 2])
+    with col_sel:
+        monster_list = sorted(df_monster['Monster'].tolist())
+        selected_monster = st.selectbox("Pilih Monster Lawan:", options=monster_list, key="sel_mon")
+        btn_find_w = st.button("Analisis Kelemahan", type="primary", use_container_width=True)
         
-        o_col1, o_col2, o_col3 = st.columns(3)
-        with o_col1:
-            st.info(f"**Tendency:**\n{tendency_emojis.get(opp_tendency, opp_tendency)}")
-        with o_col2:
-            st.error(f"**Serangan Terkuat:**\n{element_emojis.get(strong_els[0], '')} {strong_els[0]}")
-        with o_col3:
-            st.success(f"**Kelemahan Terbesar:**\n{', '.join([f'{element_emojis.get(e, '')} {e}' for e in weak_els])}")
+    with col_info:
+        if selected_monster:
+            _, _, weak_els, strong_els = get_monster_stats(selected_monster, df_monster)
+            st.info(f"Kelemahan Terbesar **{selected_monster}**: {', '.join([f'{elemen_emojis.get(e, '')} {e}' for e in weak_els])}")
+            st.warning(f"Sangat Kebal Terhadap: {', '.join([f'{elemen_emojis.get(e, '')} {e}' for e in strong_els])}")
 
-st.divider()
+    if btn_find_w:
+        with st.spinner('Mencari persenjataan...'):
+            recommendations = recommend_weapons(selected_monster, df_weapon, df_monster)
+            st.markdown(f"### 🏆 Top 6 Senjata Terbaik Melawan {selected_monster}")
+            
+            # Tampilan Card Grid (2 Kolom)
+            cols = st.columns(2)
+            for i, item in enumerate(recommendations):
+                w = item['Weapon']
+                tipe_icon = tipe_senjata_emojis.get(w['Tipe Senjata'], w['Tipe Senjata'])
+                el_icon = elemen_emojis.get(w['Elemen'], '')
+                
+                with cols[i % 2]: # Membagi ke kiri dan kanan bergantian
+                    with st.container(border=True):
+                        st.markdown(f"#### #{i+1} {w['Nama Senjata']}")
+                        st.caption(f"{tipe_icon}")
+                        
+                        m1, m2, m3 = st.columns(3)
+                        m1.metric("Attack Max", w['Attack Max'])
+                        m2.metric("Elemen", f"{el_icon} {w['Elemen']}", delta=w['Nilai Elemen'] if w['Elemen']!='Raw' else None)
+                        m3.metric("Critical", f"{w['Critical']}%")
+                        
+                        if pd.notna(w['Bonus Status Effect']) and str(w['Bonus Status Effect']).lower() not in ['none', 'nan', '']:
+                            st.write(f"🧪 **Status Effect:** {w['Bonus Status Effect']} ({w.get('Nilai Status', '')})")
+                        if pd.notna(w['Skill']):
+                            st.write(f"✨ **Skill:** {w['Skill']}")
 
-# Eksekusi Rekomendasi
-if btn_analyze:
-    with st.spinner('Mencari Monstie terbaik dari database...'):
-        recommendations = recommend_monsties_v2(selected_monster, df1)
+
+# --- TAB 2: MONSTER UNTUK SENJATA ---
+with tab2:
+    w_col_sel, w_col_info = st.columns([1, 2])
+    with w_col_sel:
+        weapon_list = sorted(df_weapon['Nama Senjata'].tolist())
+        selected_weapon = st.selectbox("Pilih Senjata di Inventory Anda:", options=weapon_list, key="sel_weap")
+        btn_find_m = st.button("Cari Target Empuk", type="primary", use_container_width=True)
         
-        if not recommendations:
-            st.warning("Tidak ada Monstie yang cocok ditemukan untuk kriteria ini.")
-        else:
-            _, opp_weak, opp_strong, opp_tend, target_tendency = analyze_opponent(selected_monster, df1)
+    with w_col_info:
+        if selected_weapon:
+            w_info = df_weapon[df_weapon['Nama Senjata'] == selected_weapon].iloc[0]
+            el_str = f"{elemen_emojis.get(w_info['Elemen'], '')} {w_info['Elemen']}"
+            st.success(f"**{w_info['Nama Senjata']}** adalah senjata bertipe **{w_info['Tipe Senjata']}** dengan daya hancur ber-elemen **{el_str}**.")
+
+    if btn_find_m:
+        with st.spinner('Memindai habitat monster...'):
+            recommendations, w_stats = recommend_monsters_for_weapon(selected_weapon, df_weapon, df_monster)
+            elemen_weap = w_stats['Elemen']
             
-            st.markdown(f"### 🏆 Top Rekomendasi untuk Melawan {selected_monster}")
-            st.caption(f"Sistem memfilter Monstie dengan Tendency **{target_tendency}**, memiliki elemen serangan **{', '.join(opp_weak)}**, dan mampu menahan serangan **{opp_strong[0]}** dari lawan.")
+            st.markdown(f"### 🎯 Top 6 Monster Rentan Terhadap {selected_weapon}")
+            if elemen_weap == 'Raw':
+                st.caption("Karena senjata ini tipe Raw (Fisik murni), sistem merekomendasikan target dengan stat *Defence* keseluruhan paling lemah.")
+            else:
+                st.caption(f"Sistem mengincar target yang memiliki pertahanan sangat buruk terhadap elemen **{elemen_weap}**.")
             
-            # Menampilkan hasil dalam bentuk "Cards" menggunakan kolom
-            cols = st.columns(len(recommendations))
-            
-            for i, recom in enumerate(recommendations):
-                with cols[i]:
-                    st.markdown(f"<h3 style='text-align:center;'>#{i+1} {recom['Monster']}</h3>", unsafe_allow_html=True)
-                    
-                    # Cek dan Tampilkan Gambar
-                    image_path = f"Monslist/{recom['Monster']}.webp"
-                    if os.path.exists(image_path):
-                        st.image(image_path, use_container_width=True)
-                    else:
-                        st.info("🖼️ Gambar tidak tersedia", icon="ℹ️")
-                    
-                    # Kotak Informasi Metrik
-                    st.write(f"**Tipe:** {tendency_emojis.get(recom['Tendency'], recom['Tendency'])}")
-                    
-                    m1, m2 = st.columns(2)
-                    with m1:
-                        st.metric(
-                            label=f"Serangan {recom['Attack Element']}", 
-                            value=recom['Attack Value'],
-                            delta="Penetrasi", delta_color="normal"
-                        )
-                    with m2:
-                        st.metric(
-                            label=f"Pertahanan {recom['Defense Element']}", 
-                            value=recom['Defense Value'],
-                            delta="Daya Tahan", delta_color="normal"
-                        )
-                    
-                    st.markdown("---")
+            # Tampilan Card Grid (2 Kolom)
+            cols2 = st.columns(2)
+            for i, item in enumerate(recommendations):
+                m = item['Monster']
+                
+                with cols2[i % 2]:
+                    with st.container(border=True):
+                        st.markdown(f"#### #{i+1} {m['Monster']}")
+                        
+                        m1, m2 = st.columns(2)
+                        m1.metric("Defence", m['Defence'], delta="-Rendah", delta_color="inverse")
+                        
+                        if elemen_weap != 'Raw':
+                            res_val = m.get(f'Res_{elemen_weap}', 3)
+                            # Render teks berdasarkan seberapa lemah
+                            if res_val == 1:
+                                desc = "Sangat Rentan"
+                            elif res_val == 2:
+                                desc = "Rentan"
+                            else:
+                                desc = "Normal"
+                                
+                            m2.metric(f"Resistansi {elemen_weap}", res_val, delta=desc, delta_color="inverse")
