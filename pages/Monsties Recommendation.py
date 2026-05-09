@@ -3,7 +3,7 @@ import pandas as pd
 import os
 
 # --- KONFIGURASI HALAMAN ---
-st.set_page_config(page_title="MHST Recommender", layout="wide")
+st.set_page_config(page_title="MHST Recommendation System", layout="wide")
 
 # --- KAMUS EMOJI & TENDENCY ---
 tendency_map = {1: 'Speed', 2: 'Power', 3: 'Technique'}
@@ -115,7 +115,7 @@ def recommend_monsties_v2(monster_name, df):
 
 
 # --- UI APLIKASI STREAMLIT ---
-st.markdown(f"<h1 style='text-align: center;'>⚔️ {series_choice}: Recommender</h1>", unsafe_allow_html=True)
+st.markdown(f"<h1 style='text-align: center;'>⚔️ {series_choice}: Recommendation System</h1>", unsafe_allow_html=True)
 st.markdown("<p style='text-align: center; color: gray;'>Sistem cerdas untuk menemukan Monstie pendamping terbaik berdasarkan analisa ofensif dan defensif.</p>", unsafe_allow_html=True)
 st.divider()
 
