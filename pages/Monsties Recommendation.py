@@ -135,3 +135,62 @@ with col_select:
     btn_analyze = st.button("Analisis & Cari Counter", use_container_width=True, type="primary")
 
 with col_opp_info:
+    if selected_monster:
+        stats, weak_els, strong_els, opp_tendency, _ = analyze_opponent(selected_monster, df1)
+        st.subheader("📊 Profil Target")
+        
+        o_col1, o_col2, o_col3 = st.columns(3)
+        with o_col1:
+            st.info(f"**Tendency:**\n{tendency_emojis.get(opp_tendency, opp_tendency)}")
+        with o_col2:
+            st.error(f"**Serangan Terkuat:**\n{element_emojis.get(strong_els[0], '')} {strong_els[0]}")
+        with o_col3:
+            st.success(f"**Kelemahan Terbesar:**\n{', '.join([f'{element_emojis.get(e, '')} {e}' for e in weak_els])}")
+
+st.divider()
+
+# Eksekusi Rekomendasi
+if btn_analyze:
+    with st.spinner('Mencari Monstie terbaik dari database...'):
+        recommendations = recommend_monsties_v2(selected_monster, df1)
+        
+        if not recommendations:
+            st.warning("Tidak ada Monstie yang cocok ditemukan untuk kriteria ini.")
+        else:
+            _, opp_weak, opp_strong, opp_tend, target_tendency = analyze_opponent(selected_monster, df1)
+            
+            st.markdown(f"### 🏆 Top Rekomendasi untuk Melawan {selected_monster}")
+            st.caption(f"Sistem memfilter Monstie dengan Tendency **{target_tendency}**, memiliki elemen serangan **{', '.join(opp_weak)}**, dan mampu menahan serangan **{opp_strong[0]}** dari lawan.")
+            
+            # Menampilkan hasil dalam bentuk "Cards" menggunakan kolom
+            cols = st.columns(len(recommendations))
+            
+            for i, recom in enumerate(recommendations):
+                with cols[i]:
+                    st.markdown(f"<h3 style='text-align:center;'>#{i+1} {recom['Monster']}</h3>", unsafe_allow_html=True)
+                    
+                    # Cek dan Tampilkan Gambar
+                    image_path = f"Monslist/{recom['Monster']}.webp"
+                    if os.path.exists(image_path):
+                        st.image(image_path, use_container_width=True)
+                    else:
+                        st.info("🖼️ Gambar tidak tersedia", icon="ℹ️")
+                    
+                    # Kotak Informasi Metrik
+                    st.write(f"**Tipe:** {tendency_emojis.get(recom['Tendency'], recom['Tendency'])}")
+                    
+                    m1, m2 = st.columns(2)
+                    with m1:
+                        st.metric(
+                            label=f"Serangan {recom['Attack Element']}", 
+                            value=recom['Attack Value'],
+                            delta="Penetrasi", delta_color="normal"
+                        )
+                    with m2:
+                        st.metric(
+                            label=f"Pertahanan {recom['Defense Element']}", 
+                            value=recom['Defense Value'],
+                            delta="Daya Tahan", delta_color="normal"
+                        )
+                    
+                    st.markdown("---")
