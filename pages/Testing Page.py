@@ -78,7 +78,7 @@ def create_h2h_radar_dynamic(target_name, target_stats, recom_name, recom_stats,
     fig.update_layout(
         title=dict(text=title, x=0.5, font=dict(size=14)),
         polar=dict(radialaxis=dict(visible=True, range=[0, 5])),
-        showlegend=False, # Disembunyikan agar tampilan grid tidak terlalu penuh
+        showlegend=False, 
         margin=dict(l=20, r=20, t=40, b=20),
         height=280
     )
@@ -134,7 +134,9 @@ def recommend_monsties_v2(monster_name, df):
                 
     unique_recoms = pd.DataFrame(recom_list).drop_duplicates(subset=['Monster'])
     if unique_recoms.empty: return None
-    return unique_recoms.sort_values(by='Score', ascending=False).to_dict('records')
+    
+    # PERUBAHAN DISINI: Hanya kembalikan 3 teratas agar UI rapi
+    return unique_recoms.sort_values(by='Score', ascending=False).head(3).to_dict('records')
 
 
 # --- UI APLIKASI STREAMLIT ---
@@ -184,8 +186,10 @@ with tab1:
             else:
                 opp_stats, opp_weak, opp_strong, opp_tend, target_tendency = analyze_opponent(selected_monster, df1)
                 
-                st.markdown(f"### 🏆 Top Rekomendasi untuk Melawan {selected_monster}")
-                cols = st.columns(len(recommendations))
+                st.markdown(f"### 🏆 Top 3 Rekomendasi untuk Melawan {selected_monster}")
+                
+                # PERUBAHAN DISINI: Mengunci jumlah kolom menjadi 3 agar lebar UI konsisten dan tidak tumpang tindih
+                cols = st.columns(3)
                 
                 for i, recom in enumerate(recommendations):
                     with cols[i]:
@@ -254,13 +258,11 @@ with tab2:
     
     # --- TABEL DETAIL DALAM EXPANDER ---
     with st.expander("📄 Lihat Angka Detail Komparasi"):
-        # Menyusun data untuk DataFrame
         all_stats = ['Tendency'] + stats_basic + stats_attack + stats_resist
         
         m1_data = [tendency_map.get(m1_stats.get('Tendency', 0), '-')] + [m1_stats.get(s, 0) for s in stats_basic + stats_attack + stats_resist]
         m2_data = [tendency_map.get(m2_stats.get('Tendency', 0), '-')] + [m2_stats.get(s, 0) for s in stats_basic + stats_attack + stats_resist]
         
-        # Membersihkan nama stat agar mudah dibaca di tabel
         clean_stats_names = ['Tendency'] + stats_basic + [s.replace('Att_', 'Attack ') for s in stats_attack] + [s.replace('Res_', 'Resistance ') for s in stats_resist]
         
         comp_data = {
