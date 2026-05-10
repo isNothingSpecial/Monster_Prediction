@@ -17,6 +17,11 @@ tendency_emojis = {
     'Speed': '🏃 (Speed)', 'Power': '🥊 (Power)', 'Technique': '🧠 (Technique)'
 }
 
+# Kategori Stat untuk iterasi grafik
+stats_basic = ['HP', 'Attack', 'Defence', 'Speed']
+stats_attack = ['Att_Fire', 'Att_Water', 'Att_Thunder', 'Att_Ice', 'Att_Dragon']
+stats_resist = ['Res_Fire', 'Res_Water', 'Res_Thunder', 'Res_Ice', 'Res_Dragon']
+
 # --- SIDEBAR: PILIHAN SERIES GAME ---
 st.sidebar.title("🐉 Pilihan Series")
 series_choice = st.sidebar.selectbox(
@@ -24,13 +29,11 @@ series_choice = st.sidebar.selectbox(
     ["Monster Hunter Stories 1", "Monster Hunter Stories 2", "Monster Hunter Stories 3"]
 )
 
-# Mapping nama series ke nama file CSV
 file_map = {
     "Monster Hunter Stories 1": "MHST_monsties.csv",
     "Monster Hunter Stories 2": "MHST2_monsties.csv", 
     "Monster Hunter Stories 3": "MHST3_monsties.csv"  
 }
-
 file_name = file_map[series_choice]
 
 # --- LOAD DATA ---
@@ -46,10 +49,11 @@ def load_data(file_path):
 
 df1 = load_data(file_name)
 
-# --- FUNGSI RADAR CHART HEAD-TO-HEAD ---
-def create_h2h_radar(target_name, target_stats, recom_name, recom_stats):
-    categories = ['HP', 'Attack', 'Defence', 'Speed']
-    cats_closed = categories + [categories[0]]
+# --- FUNGSI RADAR CHART DINAMIS ---
+def create_h2h_radar_dynamic(target_name, target_stats, recom_name, recom_stats, categories, title):
+    # Membersihkan label kategori agar tampil rapi di chart (Menghilangkan Att_ dan Res_)
+    display_cats = [c.replace('Att_', '').replace('Res_', '') for c in categories]
+    cats_closed = display_cats + [display_cats[0]]
     
     val_target = [target_stats.get(c, 0) for c in categories]
     val_target_closed = val_target + [val_target[0]]
@@ -62,21 +66,21 @@ def create_h2h_radar(target_name, target_stats, recom_name, recom_stats):
     # Trace 1: Target Lawan (Merah)
     fig.add_trace(go.Scatterpolar(
         r=val_target_closed, theta=cats_closed, fill='toself',
-        name=f"Lawan: {target_name}", line_color='#ff4b4b', opacity=0.6
+        name=f"{target_name}", line_color='#ff4b4b', opacity=0.6
     ))
     
-    # Trace 2: Monstie Rekomendasi/Kita (Biru/Cyan)
+    # Trace 2: Monstie Kita/Rekomendasi (Biru/Cyan)
     fig.add_trace(go.Scatterpolar(
         r=val_recom_closed, theta=cats_closed, fill='toself',
-        name=f"Kita: {recom_name}", line_color='#00d4ff', opacity=0.8
+        name=f"{recom_name}", line_color='#00d4ff', opacity=0.8
     ))
     
     fig.update_layout(
+        title=dict(text=title, x=0.5, font=dict(size=14)),
         polar=dict(radialaxis=dict(visible=True, range=[0, 5])),
-        showlegend=True,
-        legend=dict(orientation="h", yanchor="bottom", y=-0.3, xanchor="center", x=0.5),
-        margin=dict(l=20, r=20, t=20, b=20),
-        height=300
+        showlegend=False, # Disembunyikan agar tampilan grid tidak terlalu penuh
+        margin=dict(l=20, r=20, t=40, b=20),
+        height=280
     )
     return fig
 
@@ -84,23 +88,18 @@ def create_h2h_radar(target_name, target_stats, recom_name, recom_stats):
 def analyze_opponent(monster_name, df):
     stats = df[df['Monster'] == monster_name].iloc[0]
 
-    res_cols = {'Fire': stats['Res_Fire'], 'Water': stats['Res_Water'], 
-                'Thunder': stats['Res_Thunder'], 'Ice': stats['Res_Ice'], 'Dragon': stats['Res_Dragon']}
+    res_cols = {k.replace('Res_', ''): stats[k] for k in stats_resist}
     min_res = min(res_cols.values())
     weak_elements = [el for el, val in res_cols.items() if val == min_res]
 
-    att_cols = {'Fire': stats['Att_Fire'], 'Water': stats['Att_Water'], 
-                'Thunder': stats['Att_Thunder'], 'Ice': stats['Att_Ice'], 'Dragon': stats['Att_Dragon']}
+    att_cols = {k.replace('Att_', ''): stats[k] for k in stats_attack}
     max_att = max(att_cols.values())
     strong_elements = [el for el, val in att_cols.items() if val == max_att]
 
     opp_tendency = tendency_map.get(stats['Tendency'], 'Unknown')
-    if opp_tendency == 'Speed':
-        counter_tendency = 'Technique'
-    elif opp_tendency == 'Technique':
-        counter_tendency = 'Power'
-    else:
-        counter_tendency = 'Speed'
+    if opp_tendency == 'Speed': counter_tendency = 'Technique'
+    elif opp_tendency == 'Technique': counter_tendency = 'Power'
+    else: counter_tendency = 'Speed'
         
     return stats, weak_elements, strong_elements, opp_tendency, counter_tendency
 
@@ -109,7 +108,6 @@ def recommend_monsties_v2(monster_name, df):
     
     candidates = df[df['Tendency'] == tendency_rev_map[counter_tendency]].copy()
     candidates = candidates[candidates['Monster'] != monster_name]
-    
     opp_strongest_element = strong_elements[0] 
     recom_list = []
     
@@ -118,9 +116,7 @@ def recommend_monsties_v2(monster_name, df):
         res_col = f'Res_{opp_strongest_element}'
         
         if att_col in candidates.columns and res_col in candidates.columns:
-            # Tambahan Rarity jika ada di dataset
             rarity_bonus = candidates.get('Rarity', 1) * 2 
-            
             candidates['Score'] = (candidates[att_col] * 2) + candidates[res_col] + rarity_bonus
             top_candidates = candidates.sort_values(by=['Score', att_col], ascending=[False, False]).head(3)
             
@@ -133,13 +129,11 @@ def recommend_monsties_v2(monster_name, df):
                     'Defense Value': row[res_col],
                     'Tendency': counter_tendency,
                     'Score': row['Score'],
-                    'Stats': row # Simpan full stat untuk parsing ke Radar Chart
+                    'Stats': row 
                 })
                 
     unique_recoms = pd.DataFrame(recom_list).drop_duplicates(subset=['Monster'])
-    if unique_recoms.empty:
-        return None
-        
+    if unique_recoms.empty: return None
     return unique_recoms.sort_values(by='Score', ascending=False).to_dict('records')
 
 
@@ -175,12 +169,9 @@ with tab1:
             st.subheader("📊 Profil Target")
             
             o_col1, o_col2, o_col3 = st.columns(3)
-            with o_col1:
-                st.info(f"**Tendency:**\n{tendency_emojis.get(opp_tendency, opp_tendency)}")
-            with o_col2:
-                st.error(f"**Serangan Terkuat:**\n{element_emojis.get(strong_els[0], '')} {strong_els[0]}")
-            with o_col3:
-                st.success(f"**Kelemahan Terbesar:**\n{', '.join([f'{element_emojis.get(e, '')} {e}' for e in weak_els])}")
+            with o_col1: st.info(f"**Tendency:**\n{tendency_emojis.get(opp_tendency, opp_tendency)}")
+            with o_col2: st.error(f"**Serangan Terkuat:**\n{element_emojis.get(strong_els[0], '')} {strong_els[0]}")
+            with o_col3: st.success(f"**Kelemahan Terbesar:**\n{', '.join([f'{element_emojis.get(e, '')} {e}' for e in weak_els])}")
 
     st.divider()
 
@@ -194,9 +185,6 @@ with tab1:
                 opp_stats, opp_weak, opp_strong, opp_tend, target_tendency = analyze_opponent(selected_monster, df1)
                 
                 st.markdown(f"### 🏆 Top Rekomendasi untuk Melawan {selected_monster}")
-                st.caption(f"Sistem memfilter Monstie dengan Tendency **{target_tendency}**, memiliki elemen serangan **{', '.join(opp_weak)}**, dan mampu menahan serangan **{opp_strong[0]}** dari lawan.")
-                
-                # Menggunakan layout kolom dinamis
                 cols = st.columns(len(recommendations))
                 
                 for i, recom in enumerate(recommendations):
@@ -204,39 +192,32 @@ with tab1:
                         with st.container(border=True):
                             st.markdown(f"<h3 style='text-align:center;'>#{i+1} {recom['Monster']}</h3>", unsafe_allow_html=True)
                             
-                            # Gambar
                             image_path = f"Monslist/{recom['Monster']}.webp"
                             if os.path.exists(image_path):
                                 st.image(image_path, use_container_width=True)
                             else:
                                 st.info("🖼️ Gambar tidak tersedia", icon="ℹ️")
                             
-                            # Metrik
                             st.write(f"**Tipe:** {tendency_emojis.get(recom['Tendency'], recom['Tendency'])}")
                             
                             m1, m2 = st.columns(2)
-                            with m1:
-                                st.metric(label=f"Atk {recom['Attack Element']}", value=recom['Attack Value'])
-                            with m2:
-                                st.metric(label=f"Def {recom['Defense Element']}", value=recom['Defense Value'])
+                            with m1: st.metric(label=f"Atk {recom['Attack Element']}", value=recom['Attack Value'])
+                            with m2: st.metric(label=f"Def {recom['Defense Element']}", value=recom['Defense Value'])
                                 
-                            # Fitur Head-to-Head dalam Expander
-                            with st.expander("📊 Lihat Head-to-Head Stats"):
-                                fig_mini = create_h2h_radar(
-                                    target_name=selected_monster, 
-                                    target_stats=opp_stats, 
-                                    recom_name=recom['Monster'], 
-                                    recom_stats=recom['Stats']
+                            with st.expander("📊 Lihat Head-to-Head (Dasar)"):
+                                fig_mini = create_h2h_radar_dynamic(
+                                    selected_monster, opp_stats, 
+                                    recom['Monster'], recom['Stats'], 
+                                    stats_basic, "Stat Dasar"
                                 )
                                 st.plotly_chart(fig_mini, use_container_width=True)
-
 
 # ==========================================
 # TAB 2: BATTLE LAB (SIMULASI MANUAL)
 # ==========================================
 with tab2:
     st.subheader("🔬 Simulasi Head-to-Head Bebas")
-    st.caption("Pilih dua monster apa saja untuk membandingkan statistik dasar mereka secara visual.")
+    st.caption("Pilih dua monster apa saja untuk membandingkan statistik lengkap mereka.")
     
     col_m1, col_vs, col_m2 = st.columns([2, 1, 2])
     
@@ -253,16 +234,39 @@ with tab2:
         
     st.divider()
     
-    # Render Chart Besar
-    fig_lab = create_h2h_radar(m1_select, m1_stats, m2_select, m2_stats)
-    st.plotly_chart(fig_lab, use_container_width=True)
+    # Legend Manual untuk menjelaskan warna
+    st.markdown(f"<div style='text-align: center; margin-bottom: 20px;'><h5><span style='color: #ff4b4b;'>🔴 {m1_select}</span> &nbsp; VS &nbsp; <span style='color: #00d4ff;'>🔵 {m2_select}</span></h5></div>", unsafe_allow_html=True)
+
+    # --- TAMPILAN 3 GRID RADAR CHART ---
+    c_rad1, c_rad2, c_rad3 = st.columns(3)
     
-    # Tabel Komparasi Detail
-    st.markdown("#### Detail Komparasi")
-    comp_data = {
-        'Statistik': ['HP', 'Attack', 'Defence', 'Speed', 'Tendency'],
-        m1_select: [m1_stats.get('HP', 0), m1_stats.get('Attack', 0), m1_stats.get('Defence', 0), m1_stats.get('Speed', 0), tendency_map.get(m1_stats.get('Tendency', 0), '-')],
-        m2_select: [m2_stats.get('HP', 0), m2_stats.get('Attack', 0), m2_stats.get('Defence', 0), m2_stats.get('Speed', 0), tendency_map.get(m2_stats.get('Tendency', 0), '-')]
-    }
-    df_comp = pd.DataFrame(comp_data)
-    st.dataframe(df_comp, use_container_width=True, hide_index=True)
+    with c_rad1:
+        fig_basic = create_h2h_radar_dynamic(m1_select, m1_stats, m2_select, m2_stats, stats_basic, "Stat Dasar")
+        st.plotly_chart(fig_basic, use_container_width=True)
+        
+    with c_rad2:
+        fig_att = create_h2h_radar_dynamic(m1_select, m1_stats, m2_select, m2_stats, stats_attack, "Attack Element")
+        st.plotly_chart(fig_att, use_container_width=True)
+        
+    with c_rad3:
+        fig_def = create_h2h_radar_dynamic(m1_select, m1_stats, m2_select, m2_stats, stats_resist, "Resistance Element")
+        st.plotly_chart(fig_def, use_container_width=True)
+    
+    # --- TABEL DETAIL DALAM EXPANDER ---
+    with st.expander("📄 Lihat Angka Detail Komparasi"):
+        # Menyusun data untuk DataFrame
+        all_stats = ['Tendency'] + stats_basic + stats_attack + stats_resist
+        
+        m1_data = [tendency_map.get(m1_stats.get('Tendency', 0), '-')] + [m1_stats.get(s, 0) for s in stats_basic + stats_attack + stats_resist]
+        m2_data = [tendency_map.get(m2_stats.get('Tendency', 0), '-')] + [m2_stats.get(s, 0) for s in stats_basic + stats_attack + stats_resist]
+        
+        # Membersihkan nama stat agar mudah dibaca di tabel
+        clean_stats_names = ['Tendency'] + stats_basic + [s.replace('Att_', 'Attack ') for s in stats_attack] + [s.replace('Res_', 'Resistance ') for s in stats_resist]
+        
+        comp_data = {
+            'Statistik': clean_stats_names,
+            m1_select: m1_data,
+            m2_select: m2_data
+        }
+        df_comp = pd.DataFrame(comp_data)
+        st.dataframe(df_comp, use_container_width=True, hide_index=True)
