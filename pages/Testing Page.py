@@ -25,7 +25,7 @@ def load_data(file_path):
             df = df.drop(columns=['No'])
         return df
     except Exception:
-        # Jika user sudah mengubahnya jadi excel, sistem akan mencoba memuat excel
+        # Fallback jika user memakai format excel
         try:
             df = pd.read_excel(file_path.replace('.csv', '.xlsx'), engine='openpyxl')
             if 'No' in df.columns: df = df.drop(columns=['No'])
@@ -33,7 +33,8 @@ def load_data(file_path):
         except:
             return None
 
-def create_h2h_radar_dynamic(target_name, target_stats, recom_name, recom_stats, categories, title):
+# PERBAIKAN: Menambahkan parameter max_range agar dinamis antara MHST 1 dan MHST 2
+def create_h2h_radar_dynamic(target_name, target_stats, recom_name, recom_stats, categories, title, max_range=5):
     display_cats = [c.replace('Att_', '').replace('Res_', '') for c in categories]
     cats_closed = display_cats + [display_cats[0]]
     val_target = [target_stats.get(c, 0) for c in categories]
@@ -44,7 +45,14 @@ def create_h2h_radar_dynamic(target_name, target_stats, recom_name, recom_stats,
     fig = go.Figure()
     fig.add_trace(go.Scatterpolar(r=val_target_closed, theta=cats_closed, fill='toself', name=f"{target_name}", line_color='#ff4b4b', opacity=0.6))
     fig.add_trace(go.Scatterpolar(r=val_recom_closed, theta=cats_closed, fill='toself', name=f"{recom_name}", line_color='#00d4ff', opacity=0.8))
-    fig.update_layout(title=dict(text=title, x=0.5, font=dict(size=14)), polar=dict(radialaxis=dict(visible=True, range=[0, 5])), showlegend=False, margin=dict(l=20, r=20, t=40, b=20), height=280)
+    
+    fig.update_layout(
+        title=dict(text=title, x=0.5, font=dict(size=14)), 
+        polar=dict(radialaxis=dict(visible=True, range=[0, max_range])), # Memakai max_range dinamis
+        showlegend=False, 
+        margin=dict(l=20, r=20, t=40, b=20), 
+        height=280
+    )
     return fig
 
 # =====================================================================
@@ -110,7 +118,7 @@ def run_mhst1_app(df):
                     with st.container(border=True):
                         st.markdown(f"<h3 style='text-align:center;'>#{i+1} {r['Monster']}</h3>", unsafe_allow_html=True)
                         
-                        # --- GAMBAR DITAMBAHKAN DI SINI (MHST 1) ---
+                        # Menampilkan Gambar MHST 1
                         image_path = f"Monslist/{r['Monster']}.webp"
                         if os.path.exists(image_path):
                             st.image(image_path, use_container_width=True)
@@ -121,8 +129,10 @@ def run_mhst1_app(df):
                         m1, m2 = st.columns(2)
                         with m1: st.metric(f"Atk {r['AtkEl']}", r['Atk'])
                         with m2: st.metric(f"Def {r['DefEl']}", r['Def'])
+                        
                         with st.expander("📊 Head-to-Head (Dasar)"):
-                            st.plotly_chart(create_h2h_radar_dynamic(target, stats, r['Monster'], r['Stats'], stats_basic, "Stat Dasar"), use_container_width=True)
+                            # max_range = 5 untuk MHST 1
+                            st.plotly_chart(create_h2h_radar_dynamic(target, stats, r['Monster'], r['Stats'], stats_basic, "Stat Dasar", max_range=5), use_container_width=True)
         else:
             st.warning("Tidak ada Monstie yang cocok ditemukan.")
 
@@ -134,14 +144,12 @@ def run_mhst2_app(df):
     st.markdown("<p style='text-align: center; color: gray;'>Meracik tim lengkap (Vanguard, Backup, Specialist) untuk menghadapi setiap fase bos.</p>", unsafe_allow_html=True)
     st.divider()
 
-    # --- PERBAIKAN FUNGSI PARSER (KEBAL ERROR) ---
     def parse_combat_pattern(row):
         parsed = {}
         pattern = row.get('Combat Pattern', 'Normal:Unknown')
         if pd.notna(pattern) and str(pattern).strip() != "":
             for p in str(pattern).split('|'):
                 if ':' in p:
-                    # Menggunakan split(':', 1) agar maksimal memecah jadi 2 bagian (Mencegah error too many values to unpack)
                     parts = p.split(':', 1)
                     if len(parts) == 2:
                         parsed[parts[0].strip()] = parts[1].strip()
@@ -165,94 +173,69 @@ def run_mhst2_app(df):
         opp_tendencies = parse_combat_pattern(stats)
         return stats, weak_elements, strong_elements, opp_tendencies
 
-    col_sel, col_info = st.columns([1, 2])
-    with col_sel:
-        monster_list = sorted(df['Monster'].tolist())
-        target = st.selectbox("Pilih Target Lawan:", options=monster_list, key="m2_sel")
-        btn = st.button("Racik Hunting Party", use_container_width=True, type="primary")
+    tab1, tab2 = st.tabs(["🏆 Party Recommender", "🔬 Battle Lab (Head-to-Head)"])
 
-    with col_info:
-        if target:
+    # TAB 1: PARTY RECOMMENDER
+    with tab1:
+        col_sel, col_info = st.columns([1, 2])
+        with col_sel:
+            monster_list = sorted(df['Monster'].tolist())
+            target = st.selectbox("Pilih Target Lawan:", options=monster_list, key="m2_sel")
+            btn = st.button("Racik Hunting Party", use_container_width=True, type="primary")
+
+        with col_info:
+            if target:
+                stats, weak_els, strong_els, opp_tendencies = analyze_mhst2(target)
+                st.subheader("📊 Fase Pertarungan")
+                t_cols = st.columns(max(len(opp_tendencies), 1))
+                for idx, (phase, tend) in enumerate(opp_tendencies.items()):
+                    with t_cols[idx]:
+                        emoji = tendency_emojis.get(tend, tend)
+                        if phase == 'Normal': st.info(f"**{phase}:**\n{emoji}")
+                        elif phase == 'Enraged': st.warning(f"**{phase}:**\n{emoji}")
+                        else: st.error(f"**{phase}:**\n{emoji}")
+
+        if btn:
             stats, weak_els, strong_els, opp_tendencies = analyze_mhst2(target)
-            st.subheader("📊 Fase Pertarungan")
-            t_cols = st.columns(max(len(opp_tendencies), 1))
-            for idx, (phase, tend) in enumerate(opp_tendencies.items()):
-                with t_cols[idx]:
-                    emoji = tendency_emojis.get(tend, tend)
-                    if phase == 'Normal': st.info(f"**{phase}:**\n{emoji}")
-                    elif phase == 'Enraged': st.warning(f"**{phase}:**\n{emoji}")
-                    else: st.error(f"**{phase}:**\n{emoji}")
+            opp_strongest = strong_els[0]
+            party_lineup = []
+            used_monsters = set()
 
-    if btn:
-        stats, weak_els, strong_els, opp_tendencies = analyze_mhst2(target)
-        opp_strongest = strong_els[0]
-        party_lineup = []
-        used_monsters = set()
+            for phase_name, opp_tend in opp_tendencies.items():
+                counter_tend = 'Technique' if opp_tend == 'Speed' else 'Power' if opp_tend == 'Technique' else 'Speed' if opp_tend == 'Power' else 'Unknown'
+                candidates = df[(df['Primary_Tendency'] == counter_tend) & (df['Monster'] != target) & (~df['Monster'].isin(used_monsters))].copy()
+                
+                best_cand, best_score, best_weak_el = None, -999, weak_els[0]
+                for w_el in weak_els:
+                    att_col, res_col = f'Att_{w_el}', f'Res_{opp_strongest}'
+                    if att_col in candidates.columns and res_col in candidates.columns:
+                        candidates['Score'] = (candidates[att_col] * 2) + candidates[res_col] + (candidates.get('Rarity', 1) * 2)
+                        if not candidates.empty:
+                            top = candidates.sort_values(by=['Score', att_col], ascending=[False, False]).iloc[0]
+                            if top['Score'] > best_score:
+                                best_score, best_cand, best_weak_el = top['Score'], top, w_el
+                                
+                if best_cand is not None:
+                    used_monsters.add(best_cand['Monster'])
+                    party_lineup.append({'Phase': phase_name, 'OppTend': opp_tend, 'CounterTend': counter_tend, 'Monster': best_cand['Monster'], 'Stats': best_cand, 'AtkEl': best_weak_el, 'Atk': best_cand.get(f'Att_{best_weak_el}', 0), 'DefEl': opp_strongest, 'Def': best_cand.get(f'Res_{opp_strongest}', 0)})
 
-        for phase_name, opp_tend in opp_tendencies.items():
-            counter_tend = 'Technique' if opp_tend == 'Speed' else 'Power' if opp_tend == 'Technique' else 'Speed' if opp_tend == 'Power' else 'Unknown'
-            candidates = df[(df['Primary_Tendency'] == counter_tend) & (df['Monster'] != target) & (~df['Monster'].isin(used_monsters))].copy()
-            
-            best_cand, best_score, best_weak_el = None, -999, weak_els[0]
-            for w_el in weak_els:
-                att_col, res_col = f'Att_{w_el}', f'Res_{opp_strongest}'
-                if att_col in candidates.columns and res_col in candidates.columns:
-                    candidates['Score'] = (candidates[att_col] * 2) + candidates[res_col] + (candidates.get('Rarity', 1) * 2)
-                    if not candidates.empty:
-                        top = candidates.sort_values(by=['Score', att_col], ascending=[False, False]).iloc[0]
-                        if top['Score'] > best_score:
-                            best_score, best_cand, best_weak_el = top['Score'], top, w_el
+            if party_lineup:
+                st.markdown(f"### 🛡️ Recommended Line-up vs {target}")
+                cols = st.columns(max(len(party_lineup), 3))
+                for i, r in enumerate(party_lineup):
+                    with cols[i]:
+                        with st.container(border=True):
+                            role = "🥇 Vanguard (Pembuka)" if i == 0 else "🔄 Backup (Swap 1)" if i == 1 else f"⚠️ Specialist (Swap {i})"
+                            st.markdown(f"<div style='text-align:center; color:gray; font-size:12px;'>{role}</div>", unsafe_allow_html=True)
+                            st.markdown(f"<h4 style='text-align:center;'>Fase: {r['Phase']}</h4>", unsafe_allow_html=True)
+                            st.caption(f"<div style='text-align:center;'>Gunakan {tendency_emojis.get(r['CounterTend'])}</div>", unsafe_allow_html=True)
+                            st.markdown(f"<h3 style='text-align:center; color:#00d4ff;'>{r['Monster']}</h3>", unsafe_allow_html=True)
                             
-            if best_cand is not None:
-                used_monsters.add(best_cand['Monster'])
-                party_lineup.append({'Phase': phase_name, 'OppTend': opp_tend, 'CounterTend': counter_tend, 'Monster': best_cand['Monster'], 'Stats': best_cand, 'AtkEl': best_weak_el, 'Atk': best_cand.get(f'Att_{best_weak_el}', 0), 'DefEl': opp_strongest, 'Def': best_cand.get(f'Res_{opp_strongest}', 0)})
-
-        if party_lineup:
-            st.markdown(f"### 🛡️ Recommended Line-up vs {target}")
-            cols = st.columns(max(len(party_lineup), 3))
-            for i, r in enumerate(party_lineup):
-                with cols[i]:
-                    with st.container(border=True):
-                        role = "🥇 Vanguard (Pembuka)" if i == 0 else "🔄 Backup (Swap 1)" if i == 1 else f"⚠️ Specialist (Swap {i})"
-                        st.markdown(f"<div style='text-align:center; color:gray; font-size:12px;'>{role}</div>", unsafe_allow_html=True)
-                        st.markdown(f"<h4 style='text-align:center;'>Fase: {r['Phase']}</h4>", unsafe_allow_html=True)
-                        st.caption(f"<div style='text-align:center;'>Gunakan {tendency_emojis.get(r['CounterTend'])}</div>", unsafe_allow_html=True)
-                        st.markdown(f"<h3 style='text-align:center; color:#00d4ff;'>{r['Monster']}</h3>", unsafe_allow_html=True)
-                        
-                        # --- GAMBAR DITAMBAHKAN DI SINI (MHST 2) ---
-                        image_path = f"Monslist/{r['Monster']}.webp"
-                        if os.path.exists(image_path):
-                            st.image(image_path, use_container_width=True)
-                        else:
-                            st.info("🖼️ Gambar tidak tersedia", icon="ℹ️")
-                            
-                        m1, m2 = st.columns(2)
-                        with m1: st.metric(f"Atk {r['AtkEl']}", r['Atk'])
-                        with m2: st.metric(f"Def {r['DefEl']}", r['Def'])
-                        with st.expander("📊 Head-to-Head (Dasar)"):
-                            st.plotly_chart(create_h2h_radar_dynamic(target, stats, r['Monster'], r['Stats'], stats_basic, "Stat Dasar"), use_container_width=True)
-        else:
-            st.warning("Tidak dapat meracik Party. Database monster kurang lengkap.")
-
-# =====================================================================
-# --- 5. LOGIKA NAVIGASI UTAMA (SWITCHING) ---
-# =====================================================================
-st.sidebar.title("🐉 Pilihan Series")
-series_choice = st.sidebar.selectbox("Pilih Series Game:", ["Monster Hunter Stories 1", "Monster Hunter Stories 2"])
-
-file_map = {
-    "Monster Hunter Stories 1": "MHST_monsties.csv",
-    "Monster Hunter Stories 2": "MHST2_monsties.csv"
-}
-
-df_current = load_data(file_map[series_choice])
-
-if df_current is None:
-    st.error(f"Dataset untuk {series_choice} tidak ditemukan atau format rusak.")
-    st.stop()
-
-# Mengeksekusi blok kode yang berbeda berdasarkan pilihan di dropdown
-if series_choice == "Monster Hunter Stories 1":
-    run_mhst1_app(df_current)
-elif series_choice == "Monster Hunter Stories 2":
-    run_mhst2_app(df_current)
+                            # Menampilkan Gambar MHST 2
+                            image_path = f"Monslist/{r['Monster']}.webp"
+                            if os.path.exists(image_path):
+                                st.image(image_path, use_container_width=True)
+                            else:
+                                st.info("🖼️ Gambar tidak tersedia", icon="ℹ️")
+                                
+                            m1, m2 = st
