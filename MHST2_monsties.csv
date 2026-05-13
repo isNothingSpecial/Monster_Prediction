@@ -1,0 +1,97 @@
+﻿No;Monster;Genus;Rarity;Combat Pattern;HP;Speed;Recovery;Critical Rate;Att_Non Elemental;Att_Fire;Att_Water;Att_Thunder;Att_Ice;Att_Dragon;Res_Non Elemental;Res_Fire;Res_Water;Res_Thunder;Res_Ice;Res_Dragon
+1;Aptonoth;Herbivore;1;Normal:Power;5;3;5;3;3;1;2;2;2;2;4;2;3;3;3;3
+2;Velocidrome;Bird Wyvern;2;Normal:Speed | Enraged:Power ;3;6;1;7;6;4;4;4;3;4;3;2;2;2;1;2
+3;Kulu-Ya-Ku;Bird Wyvern;2;Normal:Technique | Grab Stone:Power;3;4;3;3;5;3;2;3;3;3;5;3;2;3;3;3
+4;Yian Kut-Ku;Bird Wyvern;2;Normal:Technique | Enraged:Speed;3;5;3;5;3;4;3;3;2;3;3;4;3;3;2;3
+5;Bulldrome;Fanged Beast;2;Normal:Power | Enraged:Speed;4;4;1;5;7;5;5;3;5;5;1;0;0;0;0;0
+6;Pukei-Pukei;Bird Wyvern;2;Normal:Technique | Enraged:Power;5;4;1;3;6;4;4;3;4;4;5;3;3;2;3;3
+7;Apceros;Herbivore;1;Normal:Power;4;3;3;4;4;3;3;2;3;3;5;3;3;2;3;3
+8;Great Jaggi;Bird Wyvern;2;Normal:Technique | Enraged:Speed;4;5;4;6;5;2;3;3;3;3;3;1;2;2;2;2
+9;Royal Ludroth;Leviathan;2;Normal:Power | Enraged:Technique;5;4;5;3;3;2;4;3;3;3;3;2;4;3;3;3
+10;Arzuros;Fanged Beast;2;Normal:Power | Enraged:Technique;4;4;5;3;4;2;3;3;3;3;4;2;3;3;3;3
+11;Qurupeco;Bird Wyvern;2;Normal:Technique | Enraged:Power;4;5;8;6;3;4;3;3;2;3;3;5;3;3;2;3
+12;Blue Yian Kut-Ku;Bird Wyvern;3;Normal:Technique | Enraged:Speed;3;5;3;5;3;5;2;3;3;3;3;4;2;3;3;3
+13;Tigrex;Flying Wyvern;5;Normal:Speed | Enraged:Power ;6;5;1;7;8;6;6;4;6;6;5;3;3;2;3;3
+14;Monoblos;Flying Wyvern;5;Normal:Speed | Enraged:Power ;6;4;1;6;7;5;5;3;5;5;6;4;4;3;4;4
+15;Paolomu;Flying Wyvern;3;Normal:Technique | Inflated Neck:Speed;5;4;8;3;4;2;3;3;3;3;6;3;4;4;4;4
+16;Basarios;Flying Wyvern;3;Normal:Technique | Enraged:Power ;6;3;8;2;3;4;2;3;3;3;6;8;4;6;6;6
+17;Yian Garuga;Bird Wyvern;3;Normal:Technique | Enraged:Power ;4;6;3;7;4;6;3;4;4;4;4;6;3;4;4;4
+18;Nargacuga;Flying Wyvern;4;Normal:Speed | Enraged:Technique ;4;7;1;10;6;4;4;3;4;4;4;3;3;2;3;3
+19;Rathian;Flying Wyvern;4;Normal:Speed | Enraged:Power ;6;5;4;4;4;6;4;4;4;3;4;6;4;4;4;3
+20;Popo;Herbivore;1;Normal:Power;7;3;6;3;2;1;2;2;3;2;3;2;3;3;4;3
+21;Congalala;Fanged Beast;2;Normal:Technique | Enraged:Power ;5;4;5;3;5;2;3;3;3;3;5;2;3;3;3;3
+22;Great Baggi;Bird Wyvern;2;Normal:Speed | Enraged:Technique ;4;5;2;6;5;2;3;3;3;3;4;2;3;3;3;3
+23;Kecha Wacha;Fanged Beast;3;Normal:Speed | Enraged:Technique ;4;5;6;7;3;2;4;3;3;3;2;1;3;2;2;2
+24;Gypceros;Bird Wyvern;2;Normal:Power | Enraged:Technique ;5;4;5;5;4;2;3;3;3;3;4;2;3;3;3;3
+25;Zamtrios;Amphibian;3;Normal:Technique | Iced Armor :Speed | Inflated Stomatch : Power;6;4;6;5;3;3;3;2;5;3;3;3;3;2;5;3
+26;Nerscylla;Temnoceran;3;Normal:Technique | Enraged:Speed ;4;5;6;7;4;2;3;3;3;3;5;2;3;3;3;3
+27;Barroth;Brute Wyvern;3;Normal:Speed | Mud Bath:Technique ;5;4;2;3;3;2;4;3;3;3;5;3;7;5;5;5
+28;Tobi-Kadachi;Fanged Wyvern;3;Normal:Speed | Enraged:Technique | Overcharged : Power;4;6;1;9;4;4;3;6;4;4;3;3;2;4;3;3
+29;Khezu;Flying Wyvern;3;Normal:Technique | Enraged:Power ;6;3;1;1;4;3;4;6;4;4;4;3;4;6;4;4
+30;Red Khezu;Flying Wyvern;4;Normal:Technique | Enraged:Power | Charged : Speed;6;2;1;2;5;5;3;7;5;5;4;4;3;6;4;4
+31;Lagombi;Fanged Beast;2;Normal:Speed | Enraged:Power ;5;5;3;5;3;2;3;3;4;3;3;2;3;3;4;3
+32;Jade Barroth;Brute Wyvern;3;Normal:Power | Enraged:Speed | Snow Bath:Technique ;5;4;3;5;3;3;3;2;4;3;5;5;5;3;7;5
+33;Anjanath;Brute Wyvern;4;Normal:Speed | Enraged:Power ;6;4;1;5;5;7;3;5;5;5;3;4;2;3;3;3
+34;Gammoth;Fanged Beast;5;Normal:Power;10;3;9;1;4;3;4;4;6;4;6;4;6;6;8;6
+35;Zinogre;Fanged Wyvern;5;Normal:Speed | Charged:Technique | Supercharged:Power ;7;6;2;7;5;5;5;7;3;5;4;4;4;6;3;4
+36;Barioth;Flying Wyvern;4;Normal:Speed | Enraged:Power ;5;5;4;7;4;3;4;4;6;4;5;3;5;5;7;5
+37;Legiana;Flying Wyvern;4;Normal:Speed | Enraged:Power | Flying:Technique ;6;6;1;8;5;5;5;3;7;5;3;3;3;2;5;3
+38;Iodrome;Bird Wyvern;2;Normal:Speed | Enraged:Power ;5;6;4;7;6;4;3;4;4;4;4;3;2;3;3;3
+39;Gendrome;Bird Wyvern;2;Normal:Speed | Enraged:Technique ;4;6;5;7;5;3;3;3;2;3;5;3;3;3;2;3
+40;Cephadrome;Piscine Wyvern;2;Normal:Speed | Enraged:Technique ;4;5;5;5;5;3;3;3;2;3;4;3;3;3;2;3
+41;Ash Kecha Wacha;Fanged Beast;4;Normal:Technique | Enraged:Speed ;4;5;7;8;3;5;2;3;3;3;3;4;2;3;3;3
+42;Purple Gypceros;Bird Wyvern;3;Normal:Technique | Enraged:Power ;5;4;4;5;5;2;3;3;3;3;4;2;3;3;3;3
+43;Green Nargacuga;Flying Wyvern;5;Normal:Speed | Enraged:Power ;5;7;1;10;7;5;5;3;5;5;4;3;3;2;3;3
+44;Diablos;Flying Wyvern;5;Normal:Power | Enraged:Speed ;6;5;1;5;7;5;5;5;3;5;6;4;4;4;3;4
+45;Black Diablos;Flying Wyvern;6;Normal:Power | Enraged:Speed ;8;5;1;7;8;6;6;6;4;6;6;4;4;4;3;4
+46;White Monoblos;Flying Wyvern;6;Normal:Power | Enraged:Speed ;7;5;1;8;8;6;6;4;6;6;6;4;4;3;4;4
+47;Crimson Qurupeco;Bird Wyvern;3;Normal:Technique | Enraged:Speed ;3;5;8;6;3;3;3;5;2;3;4;4;4;6;3;4
+48;Mizutsune;Leviathan;5;Normal:Technique | Enraged:Speed ;7;5;9;8;5;5;7;3;5;5;4;4;6;3;4;4
+49;Lagiacrus;Leviathan;5;Normal:Power | Enraged:Speed | Electrified:Technique;6;5;4;5;5;3;5;7;5;5;5;3;5;7;5;5
+50;Uragaan;Brute Wyvern;4;Normal:Power | Enraged:Technique ;9;3;5;3;4;6;3;4;4;4;6;8;4;6;6;6
+51;Brute Tigrex;Flying Wyvern;6;Normal:Power | Enraged:Speed ;7;5;1;8;8;6;4;6;6;6;6;4;3;4;4;4
+52;Purple Ludroth;Leviathan;3;Normal:Power | Enraged:Technique ;5;4;6;4;3;2;5;3;3;3;3;2;5;3;3;3
+53;Ruby Basarios;Flying Wyvern;4;Normal:Technique | Enraged:Power ;6;3;8;4;3;5;3;3;2;3;6;8;6;6;4;6
+54;Gravios;Flying Wyvern;5;Normal:Power | Enraged:Technique ;8;3;1;2;5;7;3;5;5;5;6;9;4;6;6;6
+55;Shrouded Nerscylla;Temnoceran;4;Normal:Technique | Enraged:Speed ;5;5;7;8;6;4;4;4;3;4;6;4;4;4;3;4
+56;Emerald Congalala;Fanged Beast;3;Normal:Power | Enraged:Technique ;5;4;3;5;5;3;3;3;2;3;6;4;4;4;3;4
+57;Black Gravios;Flying Wyvern;6;Normal:Power | Enraged:Technique ;9;3;3;4;5;7;3;5;5;5;6;9;4;6;6;6
+58;Ivory Lagiacrus;Leviathan;6;Normal:Speed | Enraged:Power | Electrified:Technique ;7;5;1;5;6;6;6;8;6;4;5;5;5;7;5;3
+59;Brachydios;Brute Wyvern;6;Normal:Power | Enraged:Speed ;7;5;3;5;6;9;4;6;6;6;4;6;3;4;4;4
+60;Nergigante;Elder Dragon;7;Normal:Technique | Enraged:Speed | White Spiked:Power;7;5;10;7;10;7;7;5;7;7;8;6;6;4;6;6
+61;Astalos;Flying Wyvern;5;Normal:Technique | Electrified:Power | Flying:Speed ;7;6;4;8;5;5;5;7;3;5;5;5;5;7;3;5
+62;Glavenus;Brute Wyvern;5;Normal:Power | Throat Heat:Speed | Tail Heated:Technique;7;5;1;7;6;8;4;6;6;6;5;7;3;5;5;5
+63;Bazelgeuse;Flying Wyvern;6;Normal:Speed | Enraged:Technique ;7;4;3;3;6;8;6;4;6;6;5;7;5;3;5;5
+64;Sand Barioth;Flying Wyvern;5;Normal:Speed | Enraged:Technique ;6;5;4;8;7;5;5;5;3;5;7;5;5;5;3;5
+65;Deviljho;Brute Wyvern;6;Normal:Power | Enraged:Speed ;9;4;1;2;6;6;6;4;6;9;7;5;5;5;5;3
+66;Stygian Zinogre;Fanged Wyvern;6;Normal:Technique | Enraged:Speed | Dragon Surged:Power;7;6;5;9;6;6;6;4;6;9;4;4;4;3;4;6
+67;Seregios;Flying Wyvern;6;Normal:Technique | Enraged:Speed ;6;6;1;9;8;6;6;4;6;6;6;4;4;3;4;4
+68;Rathalos;Flying Wyvern;5;Normal:Power | Enraged:Power | Flying:Speed | Flying Enraged:Technique ;7;5;3;4;5;7;5;5;5;3;5;7;5;5;5;3
+69;Azure Rathalos;Flying Wyvern;6;Normal:Power | Enraged:Power | Flying:Speed | Flying Enraged:Technique ;7;5;3;6;6;8;6;6;6;4;5;7;5;5;5;3
+70;Pink Rathian;Flying Wyvern;5;Normal:Speed | Enraged:Power ;8;5;8;6;4;6;4;4;4;3;4;6;4;4;4;3
+71;Fulgur Anjanath;Brute Wyvern;5;Normal:Power | Enraged:Speed ;7;4;1;6;6;6;6;8;4;6;3;3;3;5;2;3
+72;Silverwind Nargacuga;Flying Wyvern;7;Normal:Technique | Enraged:Speed ;7;7;1;10;8;6;6;4;6;6;7;5;5;3;5;5
+73;Thunderlord Zinogre;Fanged Wyvern;7;Normal:Power | Enraged:Speed ;8;6;5;9;6;6;6;8;4;6;6;6;6;8;4;6
+74;Bloodbath Diablos;Flying Wyvern;7;Normal:Speed | Enraged:Power ;9;5;1;7;10;7;5;7;7;7;7;5;3;5;5;5
+75;Grimclaw Tigrex;Flying Wyvern;7;Normal:Power | Enraged:Speed ;7;5;1;8;9;6;6;4;6;6;7;5;5;3;5;5
+76;Dreadqueen Rathian;Flying Wyvern;7;Normal:Technique | Enraged:Speed ;8;5;7;8;6;8;6;6;6;4;6;8;6;6;6;4
+77;Kirin;Elder Dragon;7;Normal:Speed | Enraged:Technique ;6;7;8;10;6;4;6;9;6;6;4;3;4;6;4;4
+78;Teostra;Elder Dragon;7;Normal:Speed | Enraged:Power  Flying:Technique ;9;5;2;6;7;10;5;7;7;7;5;7;3;5;5;5
+79;Rajang;Fanged Beast;6;Normal:Power | Power Aura:Power | Speed Aura:Speed | Technique Aura:Technique ;6;6;1;6;7;7;7;10;5;7;3;3;3;5;2;3
+80;Kushala Daora;Elder Dragon;7;Normal:Technique | Enraged:Power | Flying:Speed ;8;6;7;10;6;6;6;4;8;6;7;7;7;5;10;7
+81;Velkhana;Elder Dragon;7;Normal:Speed | Ice Mantle:Technique | Flying:Power ;9;5;9;9;6;4;6;6;9;6;6;4;6;6;9;6
+82;Boltreaver Astalos;Flying Wyvern;7;Normal:Technique | First Landing:Power | Second Landing:Speed ;8;6;1;10;6;6;6;8;4;6;6;6;6;8;4;6
+83;Hellblade Glavenus;Brute Wyvern;7;Normal:Power | Enraged:Speed ;7;5;1;9;6;9;4;6;6;6;6;8;4;6;6;6
+84;Elderfrost Gammoth;Fanged Beast;7;Normal:Power;10;3;5;3;6;4;6;6;8;6;7;5;7;7;10;7
+85;Soulseer Mizutsune;Leviathan;7;Normal:Speed | Enraged:Power ;8;5;10;9;6;6;9;4;6;6;6;6;8;4;6;6
+86;Oroshi Kirin;Elder Dragon;7;Normal:Speed | Enraged:Power | Ice Aura:Technique ;6;7;8;10;6;4;6;6;9;6;5;3;5;5;7;5
+87;Molten Tigrex;Flying Wyvern;7;Normal:Power | Enraged:Speed | Detonation:Technique ;8;5;1;6;10;7;5;7;7;7;7;5;3;5;5;5
+88;Dreadking Rathalos;Flying Wyvern;7;Normal:Power | Enraged:Power | Flying:Speed | Flying Enraged:Technique ;8;5;4;8;6;9;6;6;6;4;5;7;5;5;5;3
+89;Gold Rathian;Flying Wyvern;7;Normal:Speed | Enraged:Power ;8;5;10;8;6;8;6;4;6;6;6;9;6;4;6;6
+90;Silver Rathalos;Flying Wyvern;7;Normal:Power | Enraged:Power | Flying:Speed | Flying Enraged:Technique ;8;5;5;8;7;10;5;7;7;7;6;8;4;6;6;6
+91;Palamute (Normal Element);Fanged Beast;5;Normal:Speed ;5;7;1;10;7;5;5;5;5;3;4;3;3;3;3;2
+92;Palamute (Fire Element);Fanged Beast;5;Normal:Speed ;5;7;1;10;5;7;3;5;5;5;3;4;2;3;3;3
+93;Palamute (Water);Fanged Beast;5;Normal:Speed ;5;7;1;10;5;5;7;5;5;3;3;3;4;3;3;2
+94;Palamute (Thunder);Fanged Beast;5;Normal:Speed ;5;7;1;10;5;5;5;7;3;5;3;3;3;4;2;3
+95;Palamute (Ice);Fanged Beast;5;Normal:Speed ;5;7;1;10;5;3;5;5;7;5;3;2;3;3;4;3
+96;Palamute (Dragon);Fanged Beast;5;Normal:Speed ;5;7;1;10;5;5;5;3;5;7;3;3;3;2;3;4
