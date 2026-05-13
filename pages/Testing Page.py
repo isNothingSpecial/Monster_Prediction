@@ -24,10 +24,11 @@ series_choice = st.sidebar.selectbox(
     ["Monster Hunter Stories 1", "Monster Hunter Stories 2", "Monster Hunter Stories 3"]
 )
 
+# --- PERUBAHAN KE FORMAT EXCEL (.xlsx) ---
 file_map = {
-    "Monster Hunter Stories 1": "MHST_monsties.csv",
-    "Monster Hunter Stories 2": "MHST2_monsties.csv", 
-    "Monster Hunter Stories 3": "MHST3_monsties.csv"  
+    "Monster Hunter Stories 1": "MHST_monsties.xlsx",
+    "Monster Hunter Stories 2": "MHST2_monsties.xlsx", 
+    "Monster Hunter Stories 3": "MHST3_monsties.xlsx"  
 }
 file_name = file_map[series_choice]
 
@@ -35,38 +36,40 @@ file_name = file_map[series_choice]
 @st.cache_data
 def load_data(file_path):
     try:
-        # Menggunakan sep=None dan engine='python' agar Pandas otomatis mendeteksi koma(,) atau titik koma(;)
-        df = pd.read_csv(file_path, sep=None, engine='python')
+        # Menggunakan read_excel() alih-alih read_csv()
+        df = pd.read_excel(file_path, engine='openpyxl')
         if 'No' in df.columns:
             df = df.drop(columns=['No'])
         return df
-    except Exception:
+    except ImportError:
+        st.error("Library 'openpyxl' belum terinstall. Silakan buka terminal dan ketik: pip install openpyxl")
+        st.stop()
+    except Exception as e:
         return None
 
 df1 = load_data(file_name)
 
-# --- HELPER: PARSER FASE (OPSI 2) ---
+# --- HELPER: PARSER FASE ---
 def parse_combat_pattern(row):
-    """Memecah string Combat Pattern menjadi dictionary fase. Jika tidak ada, fallback ke MHST 1."""
+    """Memecah string Combat Pattern menjadi dictionary fase."""
     parsed = {}
-    if 'Combat Pattern' in row and pd.notna(row['Combat Pattern']):
-        phases = str(row['Combat Pattern']).split('|')
+    pattern_string = row.get('Combat Pattern', 'Normal:Unknown') 
+    
+    if pd.notna(pattern_string):
+        phases = str(pattern_string).split('|')
         for p in phases:
             if ':' in p:
                 k, v = p.split(':')
                 parsed[k.strip()] = v.strip()
-    else:
-        # Fallback ke MHST 1 (Hanya punya kolom Tendency)
-        numeric_val = row.get('Tendency', 0)
-        tend_str = tendency_map.get(numeric_val, 'Unknown')
-        parsed['Normal'] = tend_str
+    
+    if not parsed:
+        parsed['Normal'] = 'Unknown'
     return parsed
 
 def get_primary_tendency(row):
     """Mengambil tendensi Normal sebagai identitas utama monstie tersebut."""
     return parse_combat_pattern(row).get('Normal', 'Unknown')
 
-# Tambahkan kolom virtual 'Primary_Tendency' ke dataset untuk mempermudah pencarian counter
 if df1 is not None:
     df1['Primary_Tendency'] = df1.apply(get_primary_tendency, axis=1)
 
@@ -98,18 +101,26 @@ def create_h2h_radar_dynamic(target_name, target_stats, recom_name, recom_stats,
 def analyze_opponent_multiphase(monster_name, df):
     stats = df[df['Monster'] == monster_name].iloc[0]
 
-    # Ekstraksi Resistence & Attack (Menangani potensi kolom hilang/beda penamaan)
-    res_cols = {k.replace('Res_', ''): stats.get(k, 3) for k in stats_resist if k in stats}
-    if not res_cols: res_cols = {'Fire':3, 'Water':3, 'Thunder':3, 'Ice':3, 'Dragon':3} # Failsafe
+    def safe_num(val, default=3):
+        try:
+            num = float(val)
+            return default if pd.isna(num) else num
+        except (ValueError, TypeError):
+            return default
+
+    res_cols = {k.replace('Res_', ''): safe_num(stats.get(k)) for k in stats_resist if k in stats}
+    if not res_cols: res_cols = {'Fire':3, 'Water':3, 'Thunder':3, 'Ice':3, 'Dragon':3} 
     min_res = min(res_cols.values())
     weak_elements = [el for el, val in res_cols.items() if val == min_res]
 
-    att_cols = {k.replace('Att_', ''): stats.get(k, 3) for k in stats_attack if k in stats}
-    if not att_cols: att_cols = {'Fire':3, 'Water':3, 'Thunder':3, 'Ice':3, 'Dragon':3} # Failsafe
+    att_cols = {k.replace('Att_', ''): safe_num(stats.get(k)) for k in stats_attack if k in stats}
+    if not att_cols: att_cols = {'Fire':3, 'Water':3, 'Thunder':3, 'Ice':3, 'Dragon':3} 
     max_att = max(att_cols.values())
     strong_elements = [el for el, val in att_cols.items() if val == max_att]
 
-    # Parsing Multiphase Tendency
+    if not strong_elements: strong_elements = ['Raw']
+    if not weak_elements: weak_elements = ['Raw']
+
     opp_tendencies = parse_combat_pattern(stats)
         
     return stats, weak_elements, strong_elements, opp_tendencies
@@ -121,23 +132,20 @@ def recommend_hunting_party(monster_name, df):
     party_lineup = []
     used_monsters = set()
     
-    # Looping setiap fase musuh untuk mencari counternya
     for phase_name, opp_tend in opp_tendencies.items():
         if opp_tend == 'Speed': counter_tend = 'Technique'
         elif opp_tend == 'Technique': counter_tend = 'Power'
         elif opp_tend == 'Power': counter_tend = 'Speed'
         else: counter_tend = 'Unknown'
         
-        # Filter kandidat berdasarkan Tendensi Utama mereka yang cocok untuk mengcounter fase ini
         candidates = df[df['Primary_Tendency'] == counter_tend].copy()
         candidates = candidates[candidates['Monster'] != monster_name]
-        candidates = candidates[~candidates['Monster'].isin(used_monsters)] # Jangan rekomendasikan monster yg sama dua kali
+        candidates = candidates[~candidates['Monster'].isin(used_monsters)] 
         
         best_cand = None
         best_score = -999
         best_weak_el = weak_elements[0] if weak_elements else 'Raw'
         
-        # Mencari damage dealer terbaik
         for weak_el in weak_elements:
             att_col = f'Att_{weak_el}'
             res_col = f'Res_{opp_strongest_element}'
@@ -170,7 +178,6 @@ def recommend_hunting_party(monster_name, df):
             
     return party_lineup
 
-
 # --- UI APLIKASI STREAMLIT ---
 st.markdown(f"<h1 style='text-align: center;'>⚔️ {series_choice}: Recommendation System</h1>", unsafe_allow_html=True)
 st.markdown("<p style='text-align: center; color: gray;'>Temukan Hunting Party terbaik atau lakukan simulasi komparasi stat di Battle Lab.</p>", unsafe_allow_html=True)
@@ -178,6 +185,7 @@ st.divider()
 
 if df1 is None:
     st.error(f"Dataset untuk {series_choice} ({file_name}) belum tersedia di direktori atau format tidak didukung.")
+    st.info("Pastikan Anda sudah menyimpan file sebagai Excel (.xlsx) dan menginstall library openpyxl.")
     st.stop() 
 
 monster_list_all = sorted(df1['Monster'].tolist())
@@ -201,8 +209,10 @@ with tab1:
             stats, weak_els, strong_els, opp_tendencies = analyze_opponent_multiphase(selected_monster, df1)
             st.subheader("📊 Profil Target & Fase Pertarungan")
             
+            strong_el_display = strong_els[0] if len(strong_els) > 0 else "Unknown"
+            
             o_col1, o_col2 = st.columns(2)
-            with o_col1: st.error(f"**Serangan Terkuat:**\n{element_emojis.get(strong_els[0], '')} {strong_els[0]}")
+            with o_col1: st.error(f"**Serangan Terkuat:**\n{element_emojis.get(strong_el_display, '')} {strong_el_display}")
             with o_col2: st.success(f"**Kelemahan Terbesar:**\n{', '.join([f'{element_emojis.get(e, '')} {e}' for e in weak_els])}")
             
             st.markdown("##### ⚔️ Pola Serangan (Combat Pattern)")
@@ -228,14 +238,12 @@ with tab1:
                 st.markdown(f"### 🛡️ Recommended Line-up untuk Menaklukkan {selected_monster}")
                 st.caption("Sistem menyusun tim berdasarkan masing-masing fase wujud target. Siapkan Monstie ini di dalam party Anda dan lakukan Swap di saat yang tepat!")
                 
-                # Mengunci kolom minimal 3 agar tidak terlalu melar jika musuh hanya punya 1 fase
                 num_cols = max(len(party_lineup), 3)
                 cols = st.columns(num_cols)
                 
                 for i, recom in enumerate(party_lineup):
                     with cols[i]:
                         with st.container(border=True):
-                            # Tanda Role di Party
                             if i == 0: role = "🥇 Vanguard (Pembuka)"
                             elif i == 1: role = "🔄 Backup (Swap 1)"
                             else: role = f"⚠️ Specialist (Swap {i})"
@@ -290,7 +298,6 @@ with tab2:
     
     st.markdown(f"<div style='text-align: center; margin-bottom: 20px;'><h5><span style='color: #ff4b4b;'>🔴 {m1_select}</span> &nbsp; VS &nbsp; <span style='color: #00d4ff;'>🔵 {m2_select}</span></h5></div>", unsafe_allow_html=True)
 
-    # --- TAMPILAN 3 GRID RADAR CHART ---
     c_rad1, c_rad2, c_rad3 = st.columns(3)
     
     with c_rad1:
@@ -305,7 +312,6 @@ with tab2:
         fig_def = create_h2h_radar_dynamic(m1_select, m1_stats, m2_select, m2_stats, stats_resist, "Resistance Element")
         st.plotly_chart(fig_def, use_container_width=True)
     
-    # --- TABEL DETAIL DALAM EXPANDER ---
     with st.expander("📄 Lihat Angka Detail Komparasi"):
         m1_data = [tendency_map.get(m1_tend, m1_tend)] + [m1_stats.get(s, 0) for s in stats_basic + stats_attack + stats_resist]
         m2_data = [tendency_map.get(m2_tend, m2_tend)] + [m2_stats.get(s, 0) for s in stats_basic + stats_attack + stats_resist]
