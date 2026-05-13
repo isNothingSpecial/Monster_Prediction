@@ -11,7 +11,6 @@ tendency_rev_map = {'Speed': 1, 'Power': 2, 'Technique': 3}
 element_emojis = {'Fire': '🔥', 'Water': '💧', 'Thunder': '⚡', 'Ice': '❄️', 'Dragon': '🐉'}
 tendency_emojis = {'Speed': '🏃 (Speed)', 'Power': '🥊 (Power)', 'Technique': '🧠 (Technique)', 'Unknown': '❓ (Unknown)'}
 
-stats_basic = ['HP', 'Attack', 'Defence', 'Speed']
 stats_attack = ['Att_Fire', 'Att_Water', 'Att_Thunder', 'Att_Ice', 'Att_Dragon']
 stats_resist = ['Res_Fire', 'Res_Water', 'Res_Thunder', 'Res_Ice', 'Res_Dragon']
 
@@ -19,26 +18,26 @@ stats_resist = ['Res_Fire', 'Res_Water', 'Res_Thunder', 'Res_Ice', 'Res_Dragon']
 @st.cache_data
 def load_data(file_path):
     try:
-        # Membaca CSV dengan deteksi koma/titik koma otomatis
-        df = pd.read_csv(file_path, sep=None, engine='python')
+        # PENGAMAN 1: Memakai Regex pemisah [;,] agar Pandas tidak nge-hang (Blank Page)
+        df = pd.read_csv(file_path, sep=r'[;,]', engine='python')
         if 'No' in df.columns:
             df = df.drop(columns=['No'])
         return df
     except Exception:
-        # Fallback jika user memakai format excel
         try:
             df = pd.read_excel(file_path.replace('.csv', '.xlsx'), engine='openpyxl')
             if 'No' in df.columns: df = df.drop(columns=['No'])
             return df
-        except:
+        except Exception as e:
             return None
 
-# PERBAIKAN: Menambahkan parameter max_range agar dinamis antara MHST 1 dan MHST 2
 def create_h2h_radar_dynamic(target_name, target_stats, recom_name, recom_stats, categories, title, max_range=5):
     display_cats = [c.replace('Att_', '').replace('Res_', '') for c in categories]
     cats_closed = display_cats + [display_cats[0]]
+    
     val_target = [target_stats.get(c, 0) for c in categories]
     val_target_closed = val_target + [val_target[0]]
+    
     val_recom = [recom_stats.get(c, 0) for c in categories]
     val_recom_closed = val_recom + [val_recom[0]]
     
@@ -48,7 +47,7 @@ def create_h2h_radar_dynamic(target_name, target_stats, recom_name, recom_stats,
     
     fig.update_layout(
         title=dict(text=title, x=0.5, font=dict(size=14)), 
-        polar=dict(radialaxis=dict(visible=True, range=[0, max_range])), # Memakai max_range dinamis
+        polar=dict(radialaxis=dict(visible=True, range=[0, max_range])), 
         showlegend=False, 
         margin=dict(l=20, r=20, t=40, b=20), 
         height=280
@@ -62,6 +61,8 @@ def run_mhst1_app(df):
     st.markdown("<h1 style='text-align: center;'>⚔️ MHST 1: Classic Recommender</h1>", unsafe_allow_html=True)
     st.markdown("<p style='text-align: center; color: gray;'>Mencari Top 3 Monstie pendamping berdasarkan kelemahan elemen dan adu Tendency klasik.</p>", unsafe_allow_html=True)
     st.divider()
+    
+    stats_basic_1 = ['HP', 'Attack', 'Defence', 'Speed']
 
     def analyze_mhst1(monster_name):
         stats = df[df['Monster'] == monster_name].iloc[0]
@@ -118,7 +119,6 @@ def run_mhst1_app(df):
                     with st.container(border=True):
                         st.markdown(f"<h3 style='text-align:center;'>#{i+1} {r['Monster']}</h3>", unsafe_allow_html=True)
                         
-                        # Menampilkan Gambar MHST 1
                         image_path = f"Monslist/{r['Monster']}.webp"
                         if os.path.exists(image_path):
                             st.image(image_path, use_container_width=True)
@@ -131,8 +131,7 @@ def run_mhst1_app(df):
                         with m2: st.metric(f"Def {r['DefEl']}", r['Def'])
                         
                         with st.expander("📊 Head-to-Head (Dasar)"):
-                            # max_range = 5 untuk MHST 1
-                            st.plotly_chart(create_h2h_radar_dynamic(target, stats, r['Monster'], r['Stats'], stats_basic, "Stat Dasar", max_range=5), use_container_width=True)
+                            st.plotly_chart(create_h2h_radar_dynamic(target, stats, r['Monster'], r['Stats'], stats_basic_1, "Stat Dasar", max_range=5), use_container_width=True)
         else:
             st.warning("Tidak ada Monstie yang cocok ditemukan.")
 
@@ -143,6 +142,9 @@ def run_mhst2_app(df):
     st.markdown("<h1 style='text-align: center;'>⚔️ MHST 2: Party Recommender</h1>", unsafe_allow_html=True)
     st.markdown("<p style='text-align: center; color: gray;'>Meracik tim lengkap (Vanguard, Backup, Specialist) untuk menghadapi setiap fase bos.</p>", unsafe_allow_html=True)
     st.divider()
+    
+    # Menyesuaikan Stat Dasar khusus untuk kolom dataset MHST 2
+    stats_basic_2 = ['HP', 'Speed', 'Recovery', 'Critical Rate']
 
     def parse_combat_pattern(row):
         parsed = {}
@@ -175,7 +177,6 @@ def run_mhst2_app(df):
 
     tab1, tab2 = st.tabs(["🏆 Party Recommender", "🔬 Battle Lab (Head-to-Head)"])
 
-    # TAB 1: PARTY RECOMMENDER
     with tab1:
         col_sel, col_info = st.columns([1, 2])
         with col_sel:
@@ -231,11 +232,82 @@ def run_mhst2_app(df):
                             st.caption(f"<div style='text-align:center;'>Gunakan {tendency_emojis.get(r['CounterTend'])}</div>", unsafe_allow_html=True)
                             st.markdown(f"<h3 style='text-align:center; color:#00d4ff;'>{r['Monster']}</h3>", unsafe_allow_html=True)
                             
-                            # Menampilkan Gambar MHST 2
                             image_path = f"Monslist/{r['Monster']}.webp"
                             if os.path.exists(image_path):
                                 st.image(image_path, use_container_width=True)
                             else:
                                 st.info("🖼️ Gambar tidak tersedia", icon="ℹ️")
                                 
-                            m1, m2 = st
+                            m1, m2 = st.columns(2)
+                            with m1: st.metric(f"Atk {r['AtkEl']}", r['Atk'])
+                            with m2: st.metric(f"Def {r['DefEl']}", r['Def'])
+                            
+                            with st.expander("📊 Head-to-Head (Dasar)"):
+                                st.plotly_chart(create_h2h_radar_dynamic(target, stats, r['Monster'], r['Stats'], stats_basic_2, "Stat Dasar", max_range=10), use_container_width=True)
+            else:
+                st.warning("Tidak dapat meracik Party. Database monster kurang lengkap.")
+
+    with tab2:
+        st.subheader("🔬 Simulasi Head-to-Head Bebas")
+        st.caption("Pilih dua monster apa saja untuk membandingkan statistik lengkap mereka.")
+        
+        col_m1, col_vs, col_m2 = st.columns([2, 1, 2])
+        with col_m1:
+            m1_select = st.selectbox("Lawan 1 (Merah):", options=monster_list, index=0, key="lab_m1")
+            m1_stats = df[df['Monster'] == m1_select].iloc[0]
+            m1_tend = df[df['Monster'] == m1_select].iloc[0]['Primary_Tendency']
+        with col_vs:
+            st.markdown("<h1 style='text-align:center; padding-top:25px;'>VS</h1>", unsafe_allow_html=True)
+        with col_m2:
+            m2_select = st.selectbox("Lawan 2 (Biru):", options=monster_list, index=1 if len(monster_list)>1 else 0, key="lab_m2")
+            m2_stats = df[df['Monster'] == m2_select].iloc[0]
+            m2_tend = df[df['Monster'] == m2_select].iloc[0]['Primary_Tendency']
+            
+        st.divider()
+        st.markdown(f"<div style='text-align: center; margin-bottom: 20px;'><h5><span style='color: #ff4b4b;'>🔴 {m1_select}</span> &nbsp; VS &nbsp; <span style='color: #00d4ff;'>🔵 {m2_select}</span></h5></div>", unsafe_allow_html=True)
+
+        c_rad1, c_rad2, c_rad3 = st.columns(3)
+        with c_rad1:
+            st.plotly_chart(create_h2h_radar_dynamic(m1_select, m1_stats, m2_select, m2_stats, stats_basic_2, "Stat Dasar", max_range=10), use_container_width=True)
+        with c_rad2:
+            st.plotly_chart(create_h2h_radar_dynamic(m1_select, m1_stats, m2_select, m2_stats, stats_attack, "Attack Element", max_range=10), use_container_width=True)
+        with c_rad3:
+            st.plotly_chart(create_h2h_radar_dynamic(m1_select, m1_stats, m2_select, m2_stats, stats_resist, "Resistance Element", max_range=10), use_container_width=True)
+        
+        with st.expander("📄 Lihat Angka Detail Komparasi"):
+            m1_data = [tendency_map.get(m1_tend, m1_tend)] + [m1_stats.get(s, 0) for s in stats_basic_2 + stats_attack + stats_resist]
+            m2_data = [tendency_map.get(m2_tend, m2_tend)] + [m2_stats.get(s, 0) for s in stats_basic_2 + stats_attack + stats_resist]
+            
+            clean_stats_names = ['Primary Tendency'] + stats_basic_2 + [s.replace('Att_', 'Attack ') for s in stats_attack] + [s.replace('Res_', 'Resistance ') for s in stats_resist]
+            comp_data = {'Statistik': clean_stats_names, m1_select: m1_data, m2_select: m2_data}
+            st.dataframe(pd.DataFrame(comp_data), use_container_width=True, hide_index=True)
+
+
+# =====================================================================
+# --- 5. LOGIKA NAVIGASI UTAMA (SWITCHING) ---
+# =====================================================================
+st.sidebar.title("🐉 Pilihan Series")
+series_choice = st.sidebar.selectbox("Pilih Series Game:", ["Monster Hunter Stories 1", "Monster Hunter Stories 2"])
+
+file_map = {
+    "Monster Hunter Stories 1": "MHST_monsties.csv",
+    "Monster Hunter Stories 2": "MHST2_monsties.csv"
+}
+
+df_raw = load_data(file_map[series_choice])
+
+if df_raw is None:
+    st.error(f"Dataset untuk {series_choice} tidak ditemukan di direktori. Pastikan file Anda bernama '{file_map[series_choice]}'")
+    st.stop()
+
+# PENGAMAN 2: Menyalin data untuk mencegah Streamlit CachedObjectMutationWarning
+df_current = df_raw.copy()
+
+# PENGAMAN 3: Menangkap error di dalam UI agar layar tidak blank
+try:
+    if series_choice == "Monster Hunter Stories 1":
+        run_mhst1_app(df_current)
+    elif series_choice == "Monster Hunter Stories 2":
+        run_mhst2_app(df_current)
+except Exception as e:
+    st.error(f"❌ Terjadi kesalahan saat memuat UI. Detail Error: {e}")
