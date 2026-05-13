@@ -65,7 +65,6 @@ def run_mhst1_app(df):
         max_att = max(att_cols.values())
         strong_elements = [el for el, val in att_cols.items() if val == max_att]
 
-        # MHST 1 menggunakan angka 1, 2, 3 di kolom 'Tendency'
         opp_tendency = tendency_map.get(stats.get('Tendency', 0), 'Unknown')
         if opp_tendency == 'Speed': counter_tend = 'Technique'
         elif opp_tendency == 'Technique': counter_tend = 'Power'
@@ -110,6 +109,14 @@ def run_mhst1_app(df):
                 with cols[i]:
                     with st.container(border=True):
                         st.markdown(f"<h3 style='text-align:center;'>#{i+1} {r['Monster']}</h3>", unsafe_allow_html=True)
+                        
+                        # --- GAMBAR DITAMBAHKAN DI SINI (MHST 1) ---
+                        image_path = f"Monslist/{r['Monster']}.webp"
+                        if os.path.exists(image_path):
+                            st.image(image_path, use_container_width=True)
+                        else:
+                            st.info("🖼️ Gambar tidak tersedia", icon="ℹ️")
+                            
                         st.write(f"**Tipe:** {tendency_emojis.get(counter_tend)}")
                         m1, m2 = st.columns(2)
                         with m1: st.metric(f"Atk {r['AtkEl']}", r['Atk'])
@@ -127,14 +134,17 @@ def run_mhst2_app(df):
     st.markdown("<p style='text-align: center; color: gray;'>Meracik tim lengkap (Vanguard, Backup, Specialist) untuk menghadapi setiap fase bos.</p>", unsafe_allow_html=True)
     st.divider()
 
+    # --- PERBAIKAN FUNGSI PARSER (KEBAL ERROR) ---
     def parse_combat_pattern(row):
         parsed = {}
         pattern = row.get('Combat Pattern', 'Normal:Unknown')
-        if pd.notna(pattern):
+        if pd.notna(pattern) and str(pattern).strip() != "":
             for p in str(pattern).split('|'):
                 if ':' in p:
-                    k, v = p.split(':')
-                    parsed[k.strip()] = v.strip()
+                    # Menggunakan split(':', 1) agar maksimal memecah jadi 2 bagian (Mencegah error too many values to unpack)
+                    parts = p.split(':', 1)
+                    if len(parts) == 2:
+                        parsed[parts[0].strip()] = parts[1].strip()
         if not parsed: parsed['Normal'] = 'Unknown'
         return parsed
 
@@ -208,6 +218,14 @@ def run_mhst2_app(df):
                         st.markdown(f"<h4 style='text-align:center;'>Fase: {r['Phase']}</h4>", unsafe_allow_html=True)
                         st.caption(f"<div style='text-align:center;'>Gunakan {tendency_emojis.get(r['CounterTend'])}</div>", unsafe_allow_html=True)
                         st.markdown(f"<h3 style='text-align:center; color:#00d4ff;'>{r['Monster']}</h3>", unsafe_allow_html=True)
+                        
+                        # --- GAMBAR DITAMBAHKAN DI SINI (MHST 2) ---
+                        image_path = f"Monslist/{r['Monster']}.webp"
+                        if os.path.exists(image_path):
+                            st.image(image_path, use_container_width=True)
+                        else:
+                            st.info("🖼️ Gambar tidak tersedia", icon="ℹ️")
+                            
                         m1, m2 = st.columns(2)
                         with m1: st.metric(f"Atk {r['AtkEl']}", r['Atk'])
                         with m2: st.metric(f"Def {r['DefEl']}", r['Def'])
